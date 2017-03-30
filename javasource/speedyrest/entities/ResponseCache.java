@@ -6,19 +6,49 @@ import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
+import redis.clients.johm.Attribute;
+import redis.clients.johm.CollectionList;
+import redis.clients.johm.CollectionMap;
+import redis.clients.johm.Id;
+import redis.clients.johm.Model;
+import redis.clients.johm.Reference;
+
+@Model
 public class ResponseCache {
 
+    @Id
+    private int id;
+
+	@Attribute
 	private final String cacheKey;
+	
+	@CollectionList(of = Cookie.class)
 	private List<Cookie> cookies;
-	private SpeedyHeaders headers;
+	
+	@Reference
+	private SpeedyHeaders headers = new SpeedyHeaders();
+	
+	@Reference
 	private StringBuilder textualContent = new StringBuilder();
+	
+	@Attribute
 	private int filePartCounter = 0;
-	private Map<String, Map<String, Object>> fileParts;
+	
+	@CollectionMap(key = String.class, value = String.class)
+	private Map<String, String> fileParts;
 
 	public ResponseCache(String cacheKey) {
 		this.cacheKey = cacheKey;
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 	public String getCacheKey() {
 		return this.cacheKey;
 	}
@@ -60,19 +90,19 @@ public class ResponseCache {
 		textualContent.append(value);
 	}
 	
-	public Map<String, Map<String, Object>> getFileParts() {
+	public Map<String, String> getFileParts() {
 		return fileParts;
 	}
 
-	public void setFileParts(Map<String, Map<String, Object>> fileParts) {
+	public void setFileParts(Map<String, String> fileParts) {
 		this.fileParts = fileParts;
 	}
 	
 	public void addFilePart(byte[] b, int len) {
-		Map<String, Object> filePart = new HashMap<>();
-		filePart.put("filepartcontent" + this.filePartCounter, b);
-		filePart.put("filepartlength" + this.filePartCounter, String.valueOf(len));
-		fileParts.put("filepart" + this.filePartCounter, filePart);
+//		Map<String, Object> filePart = new HashMap<>();
+//		filePart.put("filepartcontent" + this.filePartCounter, b);
+//		filePart.put("filepartlength" + this.filePartCounter, String.valueOf(len));
+		fileParts.put("filepart" + this.filePartCounter, "Some string");
 		
 		filePartCounter++;
 	}
