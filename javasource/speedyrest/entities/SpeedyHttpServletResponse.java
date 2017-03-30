@@ -1,4 +1,4 @@
-package speedyrest.services;
+package speedyrest.entities;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
-import speedyrest.entities.ResponseCache;
-import speedyrest.entities.SpeedyCacheEntity;
 import speedyrest.respositories.CacheRepository;
 
 public class SpeedyHttpServletResponse implements HttpServletResponse {

@@ -14,8 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import speedyrest.entities.ResponseCache;
+import speedyrest.entities.SpeedyHeaders;
 import speedyrest.services.Cache;
-import speedyrest.services.SpeedyHeaders;
 
 public class CacheRepository {
 
@@ -27,27 +27,29 @@ public class CacheRepository {
 
 	public ResponseCache find(String cacheKey) {
 		Map<String, String> cachedMap = cache.getHashMap(cacheKey);
-		SpeedyHeaders speedyHeaders = getHeaders(cachedMap.get("headers"));
 		ResponseCache cachedResponse = new ResponseCache(cacheKey);
-
-		if (speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
-			cachedResponse.setFileParts(getFileParts(cachedMap));
+		System.out.println(cachedMap.size());
+		
+		if (cachedMap.size() > 0) {
+			SpeedyHeaders speedyHeaders = getHeaders(cachedMap.get("headers"));
+	
+			if (speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
+				cachedResponse.setFileParts(getFileParts(cachedMap));
+			}
+	
+			if (!speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
+				cachedResponse.setTextualContent(cachedMap.get("content"));
+			}
+	
+			cachedResponse.setCookies(getCookies(cachedMap.get("cookies")));
+			cachedResponse.setHeaders(speedyHeaders);
 		}
-
-		if (!speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
-			cachedResponse.setTextualContent(cachedMap.get("content"));
-		}
-
-		cachedResponse.setCookies(getCookies(cachedMap.get("cookies")));
-		cachedResponse.setHeaders(speedyHeaders);
 
 		return cachedResponse;
 	}
 
 	public void persist(ResponseCache responseCache) {
-		HashMap<String, String> persisableMap = new HashMap<>();
-		
-		cache.setHashMap(responseCache.getCacheKey(), persisableMap);
+		cache.persistObject(responseCache.getCacheKey());
 	}
 	
 	private SpeedyHeaders getHeaders(String headerString) {

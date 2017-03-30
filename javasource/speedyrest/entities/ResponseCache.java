@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
-import speedyrest.services.SpeedyHeaders;
-
 public class ResponseCache {
 
 	private final String cacheKey;

@@ -8,6 +8,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.ScanParams;
+import redis.clients.johm.JOhm;
 import speedyrest.proxies.constants.Constants;
 
 public class RedisCache implements Cache {
@@ -25,6 +26,7 @@ public class RedisCache implements Cache {
 			}			
 		}
 		this.redis = redisPool.getResource();
+		JOhm.setPool(redisPool);
 	}
 	
 	private void initRedisPoolWithPassword(String host, String password, int port, int index) {
@@ -69,4 +71,16 @@ public class RedisCache implements Cache {
 		}
 		return true;
 	}
+
+	@Override
+	public void persistObject(Object object) {
+		JOhm.save(object);
+	}
+
+	@Override
+	public List<?> findObject(Class<?> classDefinition, String key, Object value) {
+		return JOhm.find(classDefinition, key, value);
+	}
+	
+	
 }

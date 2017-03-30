@@ -1,4 +1,4 @@
-package speedyrest.services;
+package speedyrest.entities;
 
 import java.util.HashMap;
 

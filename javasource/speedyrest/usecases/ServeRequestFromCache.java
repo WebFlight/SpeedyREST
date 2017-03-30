@@ -1,7 +1,5 @@
 package speedyrest.usecases;
 
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,13 +12,8 @@ import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
 import speedyrest.entities.ResponseCache;
-import speedyrest.entities.SpeedyCacheEntity;
-import speedyrest.entities.SpeedyCacheFile;
-import speedyrest.entities.ResponseCache;
+import speedyrest.entities.SpeedyResponse;
 import speedyrest.respositories.CacheRepository;
-import speedyrest.services.Cache;
-import speedyrest.services.SpeedyResponse;
-import speedyrest.services.SpeedyResponseCacheInjector;
 
 public class ServeRequestFromCache extends RequestHandler {
 
@@ -36,12 +29,15 @@ public class ServeRequestFromCache extends RequestHandler {
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
 		ResponseCache cachedResponse = cacheRepository.find(cacheKey);
 		
+		System.out.println(cacheKey);
+		System.out.println(cachedResponse.getCacheKey().isEmpty());
+		
 		if (!cachedResponse.getCacheKey().isEmpty()) {
 			
 			setHeaders(response, cachedResponse);
 			setCookies(response, cachedResponse);
 			
-			if (cachedResponse.getTextualContent().isEmpty()) {
+			if (cachedResponse.getTextualContent() != null) {
 				Map<String, Map<String, Object>> fileParts = cachedResponse.getFileParts();
 				
 				for (Entry<String, Map<String, Object>> filePart : fileParts.entrySet()) {

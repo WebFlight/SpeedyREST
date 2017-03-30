@@ -1,4 +1,4 @@
-package speedyrest.services;
+package speedyrest.entities;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -8,8 +8,6 @@ import javax.servlet.ServletOutputStream;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
-import speedyrest.entities.ResponseCache;
-import speedyrest.entities.SpeedyCacheEntity;
 import speedyrest.respositories.CacheRepository;
 
 public class SpeedyServletOutputStream extends ServletOutputStream {
@@ -33,7 +31,6 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	public void write(int b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
 			responseCache.addTextualContent(String.valueOf(b));
-			cacheRepository.
 		}
 		servletOutputStream.write(BigInteger.valueOf(b).toByteArray());
 	}
@@ -42,9 +39,9 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	public void write(byte[] b, int off, int len) throws IOException {
 		// TODO: Use new FileParts method
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheRepository.appendFilePart(responseCache, b, len);
+			responseCache.addFilePart(b, len);
 			if (len < 4096) {
-				cacheRepository.setHashMap(this.responseCache.getCacheKey(), this.responseCache.getCacheObject());
+				cacheRepository.persist(responseCache);
 			}
 		}
 		this.servletOutputStream.write(b, off, len);
@@ -53,15 +50,15 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(byte[] b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheRepository.append(responseCache, new String(b));
+			responseCache.addTextualContent(String.valueOf(b));
 		}
 		servletOutputStream.write(b);
 	}
 	
 	@Override
 	public void close() throws IOException {
-		if (this.responseCache.getContent() != null) {
-				cacheRepository.setHashMap(this.responseCache.getCacheKey(), this.responseCache.getCacheObject());
+		if (this.responseCache.getTextualContent() != null) {
+			cacheRepository.persist(responseCache);
 		}
 		this.servletOutputStream.close();
 	}
