@@ -28,11 +28,8 @@ public class ServeRequestFromCache extends RequestHandler {
 
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
 		ResponseCache cachedResponse = cacheRepository.find(cacheKey);
-		
-		System.out.println(cacheKey);
-		System.out.println(cachedResponse.getCacheKey().isEmpty());
-		
-		if (!cachedResponse.getCacheKey().isEmpty()) {
+			
+		if (!(cachedResponse.getTextualContent().isEmpty() || cachedResponse.getFileParts() == null)) {
 			
 			setHeaders(response, cachedResponse);
 			setCookies(response, cachedResponse);

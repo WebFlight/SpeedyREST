@@ -1,7 +1,6 @@
 package speedyrest.entities;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import redis.clients.johm.CollectionMap;
 import redis.clients.johm.Id;
@@ -13,7 +12,7 @@ public class SpeedyHeaders {
     @Id
     private int id;
 
-	@CollectionMap(key = String.class, value = Map.class)
+	@CollectionMap(key = String.class, value = String.class)
 	private HashMap<String, String> speedyHeaders;
 
 	public SpeedyHeaders () {
