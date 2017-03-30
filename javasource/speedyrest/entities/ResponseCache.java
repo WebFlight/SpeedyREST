@@ -58,11 +58,27 @@ public class ResponseCache {
 		textualContent.append(content);
 	}
 
-	public void addContent(String value) {
+	public void addTextualContent(String value) {
 		textualContent.append(value);
 	}
-
-	public void addContent(byte[] b, int len) {
+	
+	public Map<String, byte[]> getFileParts() {
+		return filePartMap;
+	}
+	
+	public void setFileParts(Map<String, byte[]> filePartMap) {
+		this.filePartMap = filePartMap;
+	}
+	
+	public Map<String, String> getFilePartLengths() {
+		return filePartLengthMap;
+	}
+	
+	public void setFilePartLengths(Map<String, String> filePartLengthMap) {
+		this.filePartLengthMap = filePartLengthMap;
+	}
+	
+	public void addFilePart(byte[] b, int len) {
 		filePartMap.put("filepartcontent" + this.filePartCounter, b);
 		filePartLengthMap.put("filepartlength" + this.filePartCounter, String.valueOf(len));
 		filePartCounter++;
