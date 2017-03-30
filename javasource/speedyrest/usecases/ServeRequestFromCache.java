@@ -50,14 +50,11 @@ public class ServeRequestFromCache extends RequestHandler {
 					int len = Integer.valueOf(fileLengthMap.get("filepartlength" + i));
 					response.getOutputStream().write(b, 0, len);
 				}
-				return;
 			}
 			
 			if (speedyCacheEntity instanceof SpeedyCacheText) {
 				response.getOutputStream().write(((SpeedyCacheText) speedyCacheEntity).getContent().getBytes());
-				return;
 			}
-			
 			return;
 		}
 
