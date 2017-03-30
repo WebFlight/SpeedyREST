@@ -49,7 +49,7 @@ public class CacheRepository {
 	}
 
 	public void persist(ResponseCache responseCache) {
-		cache.persistObject(responseCache.getCacheKey());
+		cache.persistObject(responseCache);
 	}
 	
 	private SpeedyHeaders getHeaders(String headerString) {
