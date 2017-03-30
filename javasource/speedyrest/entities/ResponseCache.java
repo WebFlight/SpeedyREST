@@ -34,8 +34,8 @@ public class ResponseCache {
 	@Attribute
 	private int filePartCounter = 0;
 	
-	@CollectionMap(key = String.class, value = String.class)
-	private Map<String, String> fileParts;
+	@CollectionMap(key = String.class, value = Map.class)
+	private Map<String, Map<String, Object>> fileParts;
 
 	public ResponseCache(String cacheKey) {
 		this.cacheKey = cacheKey;
@@ -90,11 +90,11 @@ public class ResponseCache {
 		textualContent.append(value);
 	}
 	
-	public Map<String, String> getFileParts() {
+	public Map<String, Map<String, Object>> getFileParts() {
 		return fileParts;
 	}
 
-	public void setFileParts(Map<String, String> fileParts) {
+	public void setFileParts(Map<String, Map<String, Object>> fileParts) {
 		this.fileParts = fileParts;
 	}
 	
@@ -102,7 +102,7 @@ public class ResponseCache {
 //		Map<String, Object> filePart = new HashMap<>();
 //		filePart.put("filepartcontent" + this.filePartCounter, b);
 //		filePart.put("filepartlength" + this.filePartCounter, String.valueOf(len));
-		fileParts.put("filepart" + this.filePartCounter, "Some string");
+//		fileParts.put("filepart" + this.filePartCounter, "Some string");
 		
 		filePartCounter++;
 	}
