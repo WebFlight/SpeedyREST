@@ -9,16 +9,18 @@ import javax.servlet.http.HttpServletResponse;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
+import speedyrest.entities.ResponseCache;
 import speedyrest.entities.SpeedyCacheEntity;
+import speedyrest.respositories.CacheRepository;
 
 public class SpeedyResponse implements IMxRuntimeResponse{
 	
 	private IMxRuntimeResponse response;
 	private SpeedyHttpServletResponse speedyHttpServletResponse;
 	
-	public SpeedyResponse(IMxRuntimeRequest request, IMxRuntimeResponse response, SpeedyCacheEntity speedyCacheObject, Cache cacheDriver) throws IOException {
+	public SpeedyResponse(IMxRuntimeRequest request, IMxRuntimeResponse response, ResponseCache responseCache, CacheRepository cacheRepository) throws IOException {
 		this.response = response;
-		speedyHttpServletResponse = new SpeedyHttpServletResponse(speedyCacheObject, this.response.getHttpServletResponse(), cacheDriver, request, response);
+		speedyHttpServletResponse = new SpeedyHttpServletResponse(responseCache, this.response.getHttpServletResponse(), cacheRepository, request, response);
 	}
 
 	@Override

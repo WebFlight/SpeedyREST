@@ -1,14 +1,14 @@
 package speedyrest.services;
 
-import java.util.Map;
+import java.util.HashMap;
 
 public interface Cache {
 	
 	void set(String key, String value);
 	
-	void setHashMap(String key, Map<String, String> hashMap);
+	void setHashMap(String key, HashMap<String, String> treeMap);
 	
-	Map<String, String> getHashMap(String key);
+	HashMap<String, String> getHashMap(String key);
 	
 	String get(String key);
 	

@@ -1,5 +1,6 @@
 package speedyrest.entities;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +15,7 @@ public class ResponseCache {
 	private SpeedyHeaders headers;
 	private StringBuilder textualContent = new StringBuilder();
 	private int filePartCounter = 0;
-	private Map<String, byte[]> filePartMap;
-	private Map<String, String> filePartLengthMap;
+	private Map<String, Map<String, Object>> fileParts;
 
 	public ResponseCache(String cacheKey) {
 		this.cacheKey = cacheKey;
@@ -62,25 +62,20 @@ public class ResponseCache {
 		textualContent.append(value);
 	}
 	
-	public Map<String, byte[]> getFileParts() {
-		return filePartMap;
+	public Map<String, Map<String, Object>> getFileParts() {
+		return fileParts;
 	}
-	
-	public void setFileParts(Map<String, byte[]> filePartMap) {
-		this.filePartMap = filePartMap;
-	}
-	
-	public Map<String, String> getFilePartLengths() {
-		return filePartLengthMap;
-	}
-	
-	public void setFilePartLengths(Map<String, String> filePartLengthMap) {
-		this.filePartLengthMap = filePartLengthMap;
+
+	public void setFileParts(Map<String, Map<String, Object>> fileParts) {
+		this.fileParts = fileParts;
 	}
 	
 	public void addFilePart(byte[] b, int len) {
-		filePartMap.put("filepartcontent" + this.filePartCounter, b);
-		filePartLengthMap.put("filepartlength" + this.filePartCounter, String.valueOf(len));
+		Map<String, Object> filePart = new HashMap<>();
+		filePart.put("filepartcontent" + this.filePartCounter, b);
+		filePart.put("filepartlength" + this.filePartCounter, String.valueOf(len));
+		fileParts.put("filepart" + this.filePartCounter, filePart);
+		
 		filePartCounter++;
 	}
 }

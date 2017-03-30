@@ -32,7 +32,6 @@ public class CacheRepository {
 
 		if (speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
 			cachedResponse.setFileParts(getFileParts(cachedMap));
-			cachedResponse.setFilePartLengths(getFilePartLengths(cachedMap));
 		}
 
 		if (!speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
@@ -45,6 +44,12 @@ public class CacheRepository {
 		return cachedResponse;
 	}
 
+	public void persist(ResponseCache responseCache) {
+		HashMap<String, String> persisableMap = new HashMap<>();
+		
+		cache.setHashMap(responseCache.getCacheKey(), persisableMap);
+	}
+	
 	private SpeedyHeaders getHeaders(String headerString) {
 		Gson gson = new Gson();
 		return gson.fromJson(headerString, SpeedyHeaders.class);
@@ -62,23 +67,21 @@ public class CacheRepository {
 		return new ArrayList<Cookie>();
 	}
 
-	private HashMap<String, byte[]> getFileParts(Map<String, String> cachedMap) {
-		HashMap<String, byte[]> fileMap = new HashMap<>();
-		for (Entry<String, String> entry : cachedMap.entrySet()) {
-			if (entry.getKey().startsWith("filepartcontent")) {
-				fileMap.put(entry.getKey(), Base64.getDecoder().decode(entry.getValue()));
+	private Map<String, Map<String, Object>> getFileParts(Map<String, String> cachedMap) {
+		Map<String, Map<String, Object>> fileParts = new HashMap<>();
+		int filePartCounter = 0;
+		
+		for (Entry<String, String> fileComponent : cachedMap.entrySet()) {
+			Map<String, Object> fileComponents = new HashMap<>();
+			if (fileComponent.getKey().startsWith("filepartcontent")) {
+				fileComponents.put(fileComponent.getKey(), Base64.getDecoder().decode(fileComponent.getValue()));
 			}
-		}
-		return fileMap;
-	}
-
-	private HashMap<String, String> getFilePartLengths(Map<String, String> cachedMap) {
-		HashMap<String, String> filePartLengthMap = new HashMap<>();
-		for (Entry<String, String> entry : cachedMap.entrySet()) {
-			if (entry.getKey().startsWith("filepartlength")) {
-				filePartLengthMap.put(entry.getKey(), entry.getValue());
+			if (fileComponent.getKey().startsWith("filepartlength")) {
+				fileComponents.put(fileComponent.getKey(), fileComponent.getValue());
 			}
+			fileParts.put("filepart" + filePartCounter, fileComponents);
+			filePartCounter ++;
 		}
-		return filePartLengthMap;
+		return fileParts;
 	}
 }

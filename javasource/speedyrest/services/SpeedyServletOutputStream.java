@@ -8,21 +8,23 @@ import javax.servlet.ServletOutputStream;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
+import speedyrest.entities.ResponseCache;
 import speedyrest.entities.SpeedyCacheEntity;
+import speedyrest.respositories.CacheRepository;
 
 public class SpeedyServletOutputStream extends ServletOutputStream {
 
 	private ServletOutputStream servletOutputStream;
-	private SpeedyCacheEntity speedyCacheObject;
-	private Cache cacheDriver;
+	private ResponseCache responseCache;
+	private CacheRepository cacheRepository;
 	private IMxRuntimeRequest request;
 	private IMxRuntimeResponse response;
 	
-	public SpeedyServletOutputStream(ServletOutputStream servletOutputStream, SpeedyCacheEntity speedyCacheObject, Cache cacheDriver, IMxRuntimeRequest request, IMxRuntimeResponse response) {
+	public SpeedyServletOutputStream(ServletOutputStream servletOutputStream, ResponseCache responseCache, CacheRepository cacheRepository, IMxRuntimeRequest request, IMxRuntimeResponse response) {
 
 		this.servletOutputStream = servletOutputStream;
-		this.speedyCacheObject = speedyCacheObject;
-		this.cacheDriver = cacheDriver;
+		this.responseCache = responseCache;
+		this.cacheRepository = cacheRepository;
 		this.request = request;
 		this.response = response;
 	}
@@ -30,17 +32,19 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(int b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheDriver.append(speedyCacheObject, String.valueOf(b));
+			responseCache.addTextualContent(String.valueOf(b));
+			cacheRepository.
 		}
 		servletOutputStream.write(BigInteger.valueOf(b).toByteArray());
 	}
 	
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
+		// TODO: Use new FileParts method
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheDriver.appendFilePart(speedyCacheObject, b, len);
+			cacheRepository.appendFilePart(responseCache, b, len);
 			if (len < 4096) {
-				cacheDriver.setHashMap(this.speedyCacheObject.getCacheKey(), this.speedyCacheObject.getCacheObject());
+				cacheRepository.setHashMap(this.responseCache.getCacheKey(), this.responseCache.getCacheObject());
 			}
 		}
 		this.servletOutputStream.write(b, off, len);
@@ -49,15 +53,15 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(byte[] b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheDriver.append(speedyCacheObject, new String(b));
+			cacheRepository.append(responseCache, new String(b));
 		}
 		servletOutputStream.write(b);
 	}
 	
 	@Override
 	public void close() throws IOException {
-		if (this.speedyCacheObject.getContent() != null) {
-				cacheDriver.setHashMap(this.speedyCacheObject.getCacheKey(), this.speedyCacheObject.getCacheObject());
+		if (this.responseCache.getContent() != null) {
+				cacheRepository.setHashMap(this.responseCache.getCacheKey(), this.responseCache.getCacheObject());
 		}
 		this.servletOutputStream.close();
 	}
