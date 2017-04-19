@@ -11,9 +11,6 @@ package speedyrest.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
-import speedyrest.proxies.constants.Constants;
-import speedyrest.services.Cache;
-import speedyrest.services.RedisCache;
 
 public class JA_ClearCacheKey extends CustomJavaAction<java.lang.Boolean>
 {
@@ -29,12 +26,7 @@ public class JA_ClearCacheKey extends CustomJavaAction<java.lang.Boolean>
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		Cache redisCache = new RedisCache(
-				Constants.getREDIS_HOST(), 
-				Constants.getREDIS_PASSWORD(), 
-				Constants.getREDIS_PORT().intValue(), 
-				Constants.getREDIS_DATABASE_INDEX().intValue());
-		return redisCache.deleteByPattern(key);
+		return false;
 		// END USER CODE
 	}
 

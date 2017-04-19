@@ -12,10 +12,9 @@ package speedyrest.actions;
 import com.mendix.core.Core;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
-import speedyrest.proxies.constants.Constants;
 import speedyrest.respositories.CacheRepository;
 import speedyrest.services.Cache;
-import speedyrest.services.RedisCache;
+import speedyrest.services.MendixCache;
 import speedyrest.usecases.ServeRequestFromCache;
 
 public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
@@ -29,14 +28,8 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		
-		Cache redisCache = new RedisCache(
-				Constants.getREDIS_HOST(), 
-				Constants.getREDIS_PASSWORD(), 
-				Constants.getREDIS_PORT().intValue(), 
-				Constants.getREDIS_DATABASE_INDEX().intValue());
-		
-		CacheRepository cacheRepository = new CacheRepository(redisCache);
+		Cache mendixCache = new MendixCache();	
+		CacheRepository cacheRepository = new CacheRepository(mendixCache);
 		
 		Core.addRequestHandler("srest/", new ServeRequestFromCache(cacheRepository));
 		
