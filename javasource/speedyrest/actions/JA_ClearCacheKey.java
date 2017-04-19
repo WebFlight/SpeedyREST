@@ -11,7 +11,6 @@ package speedyrest.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
-
 import speedyrest.proxies.constants.Constants;
 import speedyrest.services.Cache;
 import speedyrest.services.RedisCache;
