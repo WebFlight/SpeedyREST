@@ -54,7 +54,7 @@ public class CacheRepository {
 	public void addHeader(ResponseCache responseCache, String key, String value) {
 		SpeedyHeaders speedyHeaders = getHeaders(responseCache);
 		speedyHeaders.addHeader(key, value);
-		responseCache.setHeaders(serializeHeaders(speedyHeaders));
+		responseCache.setHeaders(context, serializeHeaders(speedyHeaders));
 	}
 
 	public List<Cookie> getCookies(ResponseCache responseCache) {
@@ -62,12 +62,18 @@ public class CacheRepository {
 	}
 	
 	public void addCookie(ResponseCache responseCache, Cookie cookie) {
-//		TODO: implement
+		List<Cookie> cookies = getCookies(responseCache);
+		cookies.add(cookie);
+		responseCache.setCookies(context, serializeCookies(cookies));
 	}
 
 	public List<IMendixObject> getFileParts(ResponseCache responseCache) {
 		List<IMendixObject> fileParts = Core.retrieveByPath(context, responseCache.getMendixObject(), "BinaryContent_CachedObject");
 		return fileParts;
+	}
+	
+	public void addFilePart(ResponseCache responseCache, byte[] binaryContent) {
+		//TODO: to be implemented.
 	}
 	
 	private SpeedyHeaders deserializeHeaders(String headerString) {
@@ -84,11 +90,19 @@ public class CacheRepository {
 		Gson gson = new Gson();
 
 		if (cookieString != null) {
-			Type collectionType = new TypeToken<ArrayList<Cookie>>() {
-			}.getType();
+			Type collectionType = new TypeToken<ArrayList<Cookie>>() {}.getType();
 			return gson.fromJson(cookieString, collectionType);
 		}
 
 		return new ArrayList<Cookie>();
+	}
+	
+	private String serializeCookies(List<Cookie> cookies) {
+		if (!cookies.isEmpty()) {
+			Gson gson = new Gson();
+			Type collectionType = new TypeToken<ArrayList<Cookie>>() {}.getType();
+			return gson.toJson(cookies, collectionType);
+		}
+		return new String();
 	}
 }
