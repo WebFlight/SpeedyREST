@@ -2,62 +2,63 @@ package speedyrest.respositories;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.Cookie;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mendix.core.Core;
+import com.mendix.core.CoreException;
+import com.mendix.systemwideinterfaces.core.IContext;
+import com.mendix.systemwideinterfaces.core.IMendixObject;
 
 import speedyrest.entities.ResponseCache;
 import speedyrest.entities.SpeedyHeaders;
-import speedyrest.services.Cache;
 
 public class CacheRepository {
 
-	private Cache cache;
+	private IContext context;
+	private IMendixObject cacheObject;
 
-	public CacheRepository(Cache cache) {
-		this.cache = cache;
+	public CacheRepository(IContext context) {
+		this.context = context;
 	}
-
-	public ResponseCache find(String cacheKey) {
-		Map<String, String> cachedMap = cache.getHashMap(cacheKey);
-		ResponseCache cachedResponse = new ResponseCache(cacheKey);
-		System.out.println(cachedMap.size());
+	
+	public IMendixObject find(String cacheKey) {
 		
-		if (cachedMap.size() > 0) {
-			SpeedyHeaders speedyHeaders = getHeaders(cachedMap.get("headers"));
-	
-			if (speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
-				cachedResponse.setFileParts(getFileParts(cachedMap));
+		if (cacheObject == null || cacheObject.getValue(context, "Key") != cacheKey) {
+			List<IMendixObject> objectList;
+			try {
+				objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.CachedObject[Key='" + cacheKey + "']");
+				this.cacheObject = objectList.get(0);
+			} catch (CoreException e) {
+				return cacheObject;
 			}
-	
-			if (!speedyHeaders.getHeader("Content-Type").equals("application/octet-stream")) {
-				cachedResponse.setTextualContent(cachedMap.get("content"));
-			}
-	
-			cachedResponse.setCookies(getCookies(cachedMap.get("cookies")));
-			cachedResponse.setHeaders(speedyHeaders);
 		}
-
-		return cachedResponse;
+		return cacheObject;
 	}
 
 	public void persist(ResponseCache responseCache) {
-		cache.persistObject(responseCache);
+		
 	}
 	
-	private SpeedyHeaders getHeaders(String headerString) {
+	public SpeedyHeaders getHeaders(String cacheKey) {
+		IMendixObject object = find(cacheKey);
+		return getHeadersFromString((String) object.getValue(context, "headers"));
+	}
+	
+	private SpeedyHeaders getHeadersFromString(String headerString) {
 		Gson gson = new Gson();
 		return gson.fromJson(headerString, SpeedyHeaders.class);
 	}
 
-	private List<Cookie> getCookies(String cookieString) {
+	public List<Cookie> getCookies(String cacheKey) {
+		IMendixObject object = find(cacheKey);
+		return getCookiesFromString((String) object.getValue(context, "cookies"));
+	}
+	
+	private List<Cookie> getCookiesFromString(String cookieString) {
 		Gson gson = new Gson();
 
 		if (cookieString != null) {
@@ -69,21 +70,9 @@ public class CacheRepository {
 		return new ArrayList<Cookie>();
 	}
 
-	private Map<String, Map<String, Object>> getFileParts(Map<String, String> cachedMap) {
-		Map<String, Map<String, Object>> fileParts = new HashMap<>();
-		int filePartCounter = 0;
-		
-		for (Entry<String, String> fileComponent : cachedMap.entrySet()) {
-			Map<String, Object> fileComponents = new HashMap<>();
-			if (fileComponent.getKey().startsWith("filepartcontent")) {
-				fileComponents.put(fileComponent.getKey(), Base64.getDecoder().decode(fileComponent.getValue()));
-			}
-			if (fileComponent.getKey().startsWith("filepartlength")) {
-				fileComponents.put(fileComponent.getKey(), fileComponent.getValue());
-			}
-			fileParts.put("filepart" + filePartCounter, fileComponents);
-			filePartCounter ++;
-		}
+	public List<IMendixObject> getFileParts(String cacheKey) {
+		IMendixObject object = find(cacheKey);
+		List<IMendixObject> fileParts = Core.retrieveByPath(context, object, "BinaryContent_CachedObject");
 		return fileParts;
 	}
 }
