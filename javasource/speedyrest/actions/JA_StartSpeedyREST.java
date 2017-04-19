@@ -25,7 +25,7 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 	@Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
-		// BEGIN USER CODE	
+		// BEGIN USER CODE
 		CacheRepository cacheRepository = new CacheRepository(this.getContext());
 		
 		Core.addRequestHandler("srest/", new ServeRequestFromCache(cacheRepository));

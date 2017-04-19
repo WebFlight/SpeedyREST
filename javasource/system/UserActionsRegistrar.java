@@ -149,7 +149,6 @@ public class UserActionsRegistrar
     registrator.registerUserAction(restservices.actions.unfollowChanges.class);
     registrator.registerUserAction(restservices.actions.UnloadService.class);
     registrator.registerUserAction(restservices.actions.urlEncode.class);
-    registrator.registerUserAction(speedyrest.actions.JA_ClearCacheKey.class);
     registrator.registerUserAction(speedyrest.actions.JA_StartSpeedyREST.class);
     registrator.registerUserAction(system.actions.VerifyPassword.class);
   }

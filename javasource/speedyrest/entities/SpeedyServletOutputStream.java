@@ -8,6 +8,7 @@ import javax.servlet.ServletOutputStream;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
+import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
 public class SpeedyServletOutputStream extends ServletOutputStream {

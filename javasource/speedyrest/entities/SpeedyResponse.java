@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
+import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
 public class SpeedyResponse implements IMxRuntimeResponse{

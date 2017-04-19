@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
+import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
 public class SpeedyHttpServletResponse implements HttpServletResponse {
@@ -18,11 +19,13 @@ public class SpeedyHttpServletResponse implements HttpServletResponse {
 	private HttpServletResponse httpServletResponse;
 	private SpeedyServletOutputStream speedyServletOutputStream;
 	private ResponseCache responseCache;
+	private CacheRepository cacheRepository;
 	
 	public SpeedyHttpServletResponse(ResponseCache responseCache, HttpServletResponse httpServletResponse, CacheRepository cacheRepository, IMxRuntimeRequest request, IMxRuntimeResponse response) throws IOException {
 		speedyServletOutputStream  = new SpeedyServletOutputStream(httpServletResponse.getOutputStream(), responseCache, cacheRepository, request, response);
 		this.httpServletResponse = httpServletResponse;
 		this.responseCache = responseCache;
+		this.cacheRepository = cacheRepository;
 	}
 
 	@Override
@@ -92,7 +95,7 @@ public class SpeedyHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentType(String arg0) {
-		this.responseCache.addHeader("Content-Type", arg0);
+		this.cacheRepository.addHeader(responseCache, "Content-Type", arg0);
 		this.httpServletResponse.setContentType(arg0);
 	}
 
@@ -103,7 +106,7 @@ public class SpeedyHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void addCookie(Cookie arg0) {
-		this.responseCache.addCookie(arg0);
+		this.cacheRepository.addCookie(responseCache, arg0);
 		this.httpServletResponse.addCookie(arg0);
 	}
 
@@ -114,13 +117,13 @@ public class SpeedyHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void addHeader(String arg0, String arg1) {
-		this.responseCache.addHeader(arg0, arg1);
+		this.cacheRepository.addHeader(responseCache, arg0, arg1);
 		this.httpServletResponse.addHeader(arg0, arg1);	
 	}
 
 	@Override
 	public void addIntHeader(String arg0, int arg1) {
-		this.responseCache.addHeader(arg0, String.valueOf(arg1));
+		this.cacheRepository.addHeader(responseCache, arg0, String.valueOf(arg1));
 		this.httpServletResponse.addIntHeader(arg0, arg1);		
 	}
 
@@ -195,13 +198,13 @@ public class SpeedyHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setHeader(String arg0, String arg1) {
-		this.responseCache.addHeader(arg0, arg1);
+		this.cacheRepository.addHeader(responseCache, arg0, arg1);
 		this.httpServletResponse.setHeader(arg0, arg1);	
 	}
 
 	@Override
 	public void setIntHeader(String arg0, int arg1) {
-		this.responseCache.addHeader(arg0, String.valueOf(arg1));
+		this.cacheRepository.addHeader(responseCache, arg0, String.valueOf(arg1));
 		this.httpServletResponse.setIntHeader(arg0, arg1);
 	}
 

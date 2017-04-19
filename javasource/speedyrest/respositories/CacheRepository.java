@@ -13,52 +13,74 @@ import com.mendix.core.CoreException;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 
-import speedyrest.entities.ResponseCache;
 import speedyrest.entities.SpeedyHeaders;
+import speedyrest.proxies.ResponseCache;
 
 public class CacheRepository {
 
 	private IContext context;
-	private IMendixObject cacheObject;
 
 	public CacheRepository(IContext context) {
 		this.context = context;
 	}
 	
-	public IMendixObject find(String cacheKey) {
-		
-		if (cacheObject == null || cacheObject.getValue(context, "Key") != cacheKey) {
-			List<IMendixObject> objectList;
-			try {
-				objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.CachedObject[Key='" + cacheKey + "']");
-				this.cacheObject = objectList.get(0);
-			} catch (CoreException e) {
-				return cacheObject;
-			}
-		}
-		return cacheObject;
+	public ResponseCache find(String cacheKey) throws CoreException {
+		List<IMendixObject> objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.CachedObject[Key='" + cacheKey + "']");
+		return ResponseCache.initialize(context, objectList.get(0));
 	}
 
-	public void persist(ResponseCache responseCache) {
-		
+	public void persist(ResponseCache responseCache) throws CoreException {
+		responseCache.commit(context);
 	}
 	
-	public SpeedyHeaders getHeaders(String cacheKey) {
-		IMendixObject object = find(cacheKey);
-		return getHeadersFromString((String) object.getValue(context, "headers"));
+	public ResponseCache createResponseCache(String key) {
+		ResponseCache responseCache = new ResponseCache(context);
+		responseCache.setKey(key);
+		return responseCache;
 	}
 	
-	private SpeedyHeaders getHeadersFromString(String headerString) {
+	public String getContent(ResponseCache responseCache) {
+		return responseCache.getContent(context);
+	}
+	
+	public void setContent(ResponseCache responseCache, String cacheKey, String content) {
+		responseCache.setContent(context, content);
+	}
+	
+	public SpeedyHeaders getHeaders(ResponseCache responseCache) {
+		return deserializeHeaders(responseCache.getHeaders(context));
+	}
+	
+	public void addHeader(ResponseCache responseCache, String key, String value) {
+		SpeedyHeaders speedyHeaders = getHeaders(responseCache);
+		speedyHeaders.addHeader(key, value);
+		responseCache.setHeaders(serializeHeaders(speedyHeaders));
+	}
+
+	public List<Cookie> getCookies(ResponseCache responseCache) {
+		return deserializeCookies(responseCache.getCookies(context));
+	}
+	
+	public void addCookie(ResponseCache responseCache, Cookie cookie) {
+//		TODO: implement
+	}
+
+	public List<IMendixObject> getFileParts(ResponseCache responseCache) {
+		List<IMendixObject> fileParts = Core.retrieveByPath(context, responseCache.getMendixObject(), "BinaryContent_CachedObject");
+		return fileParts;
+	}
+	
+	private SpeedyHeaders deserializeHeaders(String headerString) {
 		Gson gson = new Gson();
 		return gson.fromJson(headerString, SpeedyHeaders.class);
 	}
-
-	public List<Cookie> getCookies(String cacheKey) {
-		IMendixObject object = find(cacheKey);
-		return getCookiesFromString((String) object.getValue(context, "cookies"));
+	
+	private String serializeHeaders(SpeedyHeaders speedyHeaders) {
+		Gson gson = new Gson();
+		return gson.toJson(speedyHeaders, SpeedyHeaders.class);
 	}
 	
-	private List<Cookie> getCookiesFromString(String cookieString) {
+	private List<Cookie> deserializeCookies(String cookieString) {
 		Gson gson = new Gson();
 
 		if (cookieString != null) {
@@ -68,11 +90,5 @@ public class CacheRepository {
 		}
 
 		return new ArrayList<Cookie>();
-	}
-
-	public List<IMendixObject> getFileParts(String cacheKey) {
-		IMendixObject object = find(cacheKey);
-		List<IMendixObject> fileParts = Core.retrieveByPath(context, object, "BinaryContent_CachedObject");
-		return fileParts;
 	}
 }
