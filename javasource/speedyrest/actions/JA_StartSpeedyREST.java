@@ -28,7 +28,7 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		Cache mendixCache = new MendixCache();	
+		Cache mendixCache = new MendixCache(this.getContext());	
 		CacheRepository cacheRepository = new CacheRepository(mendixCache);
 		
 		Core.addRequestHandler("srest/", new ServeRequestFromCache(cacheRepository));
