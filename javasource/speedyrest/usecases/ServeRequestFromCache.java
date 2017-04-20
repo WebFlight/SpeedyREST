@@ -31,6 +31,7 @@ public class ServeRequestFromCache extends RequestHandler {
 
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
 		try {
+			System.out.println("Cachekey: " + cacheKey);
 			ResponseCache cachedResponse = cacheRepository.find(cacheKey);
 			serveFromCache(cachedResponse, response);
 		} catch(Exception e) {
@@ -38,11 +39,14 @@ public class ServeRequestFromCache extends RequestHandler {
 		}
 	}
 
-	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {			
+	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {
+		System.out.println("Cache: YES");
 		setHeaders(response, responseCache);
+		System.out.println("Headers set");
 		setCookies(response, responseCache);
+		System.out.println("Cookies set");
 		
-		if (responseCache.getContent() != null) {
+		if (responseCache.getContent() == null) {
 			List<BinaryContent> fileParts = cacheRepository.getFileParts(responseCache);
 			Iterator<BinaryContent> filePart = fileParts.iterator();
 			
@@ -57,6 +61,7 @@ public class ServeRequestFromCache extends RequestHandler {
 	}
 	
 	private void serveFromRest(String cacheKey, IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
+		System.out.println("Cache: NO");
 		RestServiceHandler handler = new RestServiceHandler();
 		ResponseCache responseCache = this.cacheRepository.createResponseCache(cacheKey);
 		SpeedyResponse speedyResponse = new SpeedyResponse(request, response, responseCache, cacheRepository);

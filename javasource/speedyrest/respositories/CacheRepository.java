@@ -30,7 +30,7 @@ public class CacheRepository {
 	}
 	
 	public ResponseCache find(String cacheKey) throws CoreException {
-		List<IMendixObject> objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.CachedObject[Key='" + cacheKey + "']");
+		List<IMendixObject> objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.ResponseCache[Key='" + cacheKey + "']");
 		return ResponseCache.initialize(context, objectList.get(0));
 	}
 
@@ -50,6 +50,9 @@ public class CacheRepository {
 	
 	public void addContent(ResponseCache responseCache, String content) {
 		String oldContent = getContent(responseCache);
+		if (oldContent == null) {
+			oldContent = new String("");
+		}
 		StringBuilder stringBuilder = new StringBuilder(oldContent);
 		stringBuilder.append(content);
 		responseCache.setContent(context, stringBuilder.toString());
@@ -61,6 +64,10 @@ public class CacheRepository {
 	
 	public void addHeader(ResponseCache responseCache, String key, String value) {
 		SpeedyHeaders speedyHeaders = getHeaders(responseCache);
+		if (speedyHeaders == null) {
+			speedyHeaders = new SpeedyHeaders();			
+		}
+		
 		speedyHeaders.addHeader(key, value);
 		responseCache.setHeaders(context, serializeHeaders(speedyHeaders));
 	}

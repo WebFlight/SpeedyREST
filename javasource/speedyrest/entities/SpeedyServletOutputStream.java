@@ -55,7 +55,7 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(byte[] b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheRepository.addContent(responseCache, String.valueOf(b));
+			cacheRepository.addContent(responseCache, new String(b));
 		}
 		servletOutputStream.write(b);
 	}
