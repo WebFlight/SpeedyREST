@@ -83,7 +83,7 @@ public class CacheRepository {
 	}
 
 	public List<BinaryContent> getFileParts(ResponseCache responseCache) {
-		List<IMendixObject> fileParts = Core.retrieveByPath(context, responseCache.getMendixObject(), "BinaryContent_CachedObject");
+		List<IMendixObject> fileParts = Core.retrieveByPath(context, responseCache.getMendixObject(), "SpeedyREST.BinaryContent_ResponseCache");
 		List<BinaryContent> filePartsNew = new LinkedList<>();
 		Iterator<IMendixObject> filePart = fileParts.iterator();
 		int counter = 0;
@@ -98,7 +98,7 @@ public class CacheRepository {
 		List<BinaryContent> fileParts = getFileParts(responseCache);
 		int numberFileParts = fileParts.size();
 		BinaryContent binaryContent = new BinaryContent(context);
-		binaryContent.setBinaryContent_CachedObject(context, responseCache);
+		binaryContent.setBinaryContent_ResponseCache(context, responseCache);
 		binaryContent.setContent(context, new ByteArrayInputStream(byteArray), length);
 		binaryContent.setPart(context, numberFileParts + 1);
 	}

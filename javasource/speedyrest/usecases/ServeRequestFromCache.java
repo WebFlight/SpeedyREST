@@ -42,9 +42,7 @@ public class ServeRequestFromCache extends RequestHandler {
 	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {
 		System.out.println("Cache: YES");
 		setHeaders(response, responseCache);
-		System.out.println("Headers set");
 		setCookies(response, responseCache);
-		System.out.println("Cookies set");
 		
 		if (responseCache.getContent() == null) {
 			List<BinaryContent> fileParts = cacheRepository.getFileParts(responseCache);
