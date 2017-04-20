@@ -2,10 +2,6 @@ package speedyrest.entities;
 
 import java.util.HashMap;
 
-import redis.clients.johm.CollectionMap;
-import redis.clients.johm.Id;
-import redis.clients.johm.Model;
-
 public class SpeedyHeaders {
 	
     private int id;
