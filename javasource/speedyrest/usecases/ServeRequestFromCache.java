@@ -2,6 +2,7 @@ package speedyrest.usecases;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,8 +13,8 @@ import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
-import speedyrest.entities.SpeedyHeaders;
 import speedyrest.entities.SpeedyResponse;
+import speedyrest.proxies.BinaryContent;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
@@ -37,35 +38,22 @@ public class ServeRequestFromCache extends RequestHandler {
 		}
 	}
 
-	private void serveFromCache(ResponseCache cachedResponse, IMxRuntimeResponse response) {			
-		setHeaders(response, cachedResponse);
-		setCookies(response, cachedResponse);
+	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {			
+		setHeaders(response, responseCache);
+		setCookies(response, responseCache);
 		
-		if (cachedResponse.getTextualContent() != null) {
-			Map<String, Map<String, Object>> fileParts = cachedResponse.getFileParts();
+		if (responseCache.getContent() != null) {
+			List<BinaryContent> fileParts = cacheRepository.getFileParts(responseCache);
+			Iterator<BinaryContent> filePart = fileParts.iterator();
 			
-			for (Entry<String, Map<String, Object>> filePart : fileParts.entrySet()) {
-				Map<String, Object> fileComponents = filePart.getValue();
-				for (Entry<String, Object> fileComponent : fileComponents.entrySet()) {
-					byte[] b = new byte[0];
-					int len = 0;
-					if (fileComponent.getKey().startsWith("filepartcontent")) {
-						b = (byte[]) fileComponent.getValue();
-					}
-					if (fileComponent.getKey().startsWith("filepartlength")) {
-						len = (int) fileComponent.getValue();
-					}
-					response.getOutputStream().write(b, 0, len);
-				}
+			while (filePart.hasNext()) {
+				cacheRepository.getBinaryContentContent(filePart.next(), response.getOutputStream());
 			}
 		}
 		
-		if (cachedResponse.getTextualContent().length() > 0) {
-			response.getOutputStream().write(cachedResponse.getTextualContent().getBytes());
+		if (cacheRepository.getContent(responseCache).length() > 0) {
+			response.getOutputStream().write(cacheRepository.getContent(responseCache).getBytes());
 		}
-
-		SpeedyHeaders cachedHeaders = cachedResponse.getHeaders();
-		cachedHeaders.getHeader(key)
 	}
 	
 	private void serveFromRest(String cacheKey, IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {

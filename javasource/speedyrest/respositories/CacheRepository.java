@@ -1,8 +1,11 @@
 package speedyrest.respositories;
 
 import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -72,18 +75,29 @@ public class CacheRepository {
 		responseCache.setCookies(context, serializeCookies(cookies));
 	}
 
-	public List<IMendixObject> getFileParts(ResponseCache responseCache) {
+	public List<BinaryContent> getFileParts(ResponseCache responseCache) {
 		List<IMendixObject> fileParts = Core.retrieveByPath(context, responseCache.getMendixObject(), "BinaryContent_CachedObject");
-		return fileParts;
+		List<BinaryContent> filePartsNew = new LinkedList<>();
+		Iterator<IMendixObject> filePart = fileParts.iterator();
+		int counter = 0;
+		while(filePart.hasNext()) {
+			filePartsNew.add(counter, BinaryContent.initialize(context, filePart.next()));
+			counter++;
+		}
+		return filePartsNew;
 	}
 	
 	public void addFilePart(ResponseCache responseCache, byte[] byteArray, int length) {
-		List<IMendixObject> fileParts = getFileParts(responseCache);
+		List<BinaryContent> fileParts = getFileParts(responseCache);
 		int numberFileParts = fileParts.size();
 		BinaryContent binaryContent = new BinaryContent(context);
 		binaryContent.setBinaryContent_CachedObject(context, responseCache);
 		binaryContent.setContent(context, new ByteArrayInputStream(byteArray), length);
 		binaryContent.setPart(context, numberFileParts + 1);
+	}
+	
+	public void getBinaryContentContent(BinaryContent binaryContent, OutputStream outputStream) {
+		binaryContent.getContent(context, outputStream);
 	}
 	
 	private SpeedyHeaders deserializeHeaders(String headerString) {
