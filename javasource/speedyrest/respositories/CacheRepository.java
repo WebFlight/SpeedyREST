@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -107,7 +108,7 @@ public class CacheRepository {
 			bNew = Bytes.concat(bOld, byteArray);
 			oldLength = bOld.length;
 		}
-		else{
+		if (bOld == null) {
 			bNew = byteArray;
 		}
 		
