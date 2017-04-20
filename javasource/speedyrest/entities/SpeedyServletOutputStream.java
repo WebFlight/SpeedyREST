@@ -39,7 +39,7 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		if (isGetRequest() && isHttpStatusSuccess()) {
+		if (isGetRequest() && isHttpStatusSuccess() && cacheRepository.cacheFileContent()) {
 			cacheRepository.addBinaryContent(responseCache, b, len);
 			if (len < 4096) {
 				try {

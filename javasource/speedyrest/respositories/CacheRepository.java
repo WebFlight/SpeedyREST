@@ -21,6 +21,7 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 
 import speedyrest.entities.SpeedyHeaders;
 import speedyrest.proxies.ResponseCache;
+import speedyrest.proxies.constants.Constants;
 
 public class CacheRepository {
 
@@ -118,6 +119,10 @@ public class CacheRepository {
 	private SpeedyHeaders deserializeHeaders(String headerString) {
 		Gson gson = new Gson();
 		return gson.fromJson(headerString, SpeedyHeaders.class);
+	}
+	
+	public boolean cacheFileContent() {
+		return  Constants.getCACHE_FILE_CONTENT();
 	}
 	
 	private String serializeHeaders(SpeedyHeaders speedyHeaders) {
