@@ -30,7 +30,7 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 		
 		Core.addRequestHandler("srest/", new ServeRequestFromCache(cacheRepository));
 		
-		Core.getLogger("RequestHandlers").info("Registered SpeedyREST requesthandler for 'srest/'");
+		Core.getLogger("SpeedyREST").info("Registered SpeedyREST requesthandler for 'srest/'");
 		return true;
 		// END USER CODE
 	}

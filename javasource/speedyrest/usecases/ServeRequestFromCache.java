@@ -60,7 +60,6 @@ public class ServeRequestFromCache extends RequestHandler {
 	}
 	
 	private void serveFromRest(String cacheKey, IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
-		System.out.println("Cache: NO");
 		RestServiceHandler handler = new RestServiceHandler();
 		ResponseCache responseCache = this.cacheRepository.createResponseCache(cacheKey);
 		SpeedyResponse speedyResponse = new SpeedyResponse(request, response, responseCache, cacheRepository);
