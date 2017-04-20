@@ -1,5 +1,6 @@
 package speedyrest.respositories;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 
 import speedyrest.entities.SpeedyHeaders;
+import speedyrest.proxies.BinaryContent;
 import speedyrest.proxies.ResponseCache;
 
 public class CacheRepository {
@@ -72,8 +74,13 @@ public class CacheRepository {
 		return fileParts;
 	}
 	
-	public void addFilePart(ResponseCache responseCache, byte[] binaryContent) {
-		//TODO: to be implemented.
+	public void addFilePart(ResponseCache responseCache, byte[] byteArray, int length) {
+		List<IMendixObject> fileParts = getFileParts(responseCache);
+		int numberFileParts = fileParts.size();
+		BinaryContent binaryContent = new BinaryContent(context);
+		binaryContent.setBinaryContent_CachedObject(context, responseCache);
+		binaryContent.setContent(context, new ByteArrayInputStream(byteArray), length);
+		binaryContent.setPart(context, numberFileParts + 1);
 	}
 	
 	private SpeedyHeaders deserializeHeaders(String headerString) {
