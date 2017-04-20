@@ -45,8 +45,11 @@ public class CacheRepository {
 		return responseCache.getContent(context);
 	}
 	
-	public void setContent(ResponseCache responseCache, String cacheKey, String content) {
-		responseCache.setContent(context, content);
+	public void addContent(ResponseCache responseCache, String content) {
+		String oldContent = getContent(responseCache);
+		StringBuilder stringBuilder = new StringBuilder(oldContent);
+		stringBuilder.append(content);
+		responseCache.setContent(context, stringBuilder.toString());
 	}
 	
 	public SpeedyHeaders getHeaders(ResponseCache responseCache) {
