@@ -5,6 +5,7 @@ import java.math.BigInteger;
 
 import javax.servlet.ServletOutputStream;
 
+import com.mendix.core.CoreException;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
@@ -31,18 +32,21 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(int b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			responseCache.addTextualContent(String.valueOf(b));
+			cacheRepository.addContent(responseCache, String.valueOf(b));
 		}
 		servletOutputStream.write(BigInteger.valueOf(b).toByteArray());
 	}
 	
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		// TODO: Use new FileParts method
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			responseCache.addFilePart(b, len);
+			cacheRepository.addFilePart(responseCache, b, len);
 			if (len < 4096) {
-				cacheRepository.persist(responseCache);
+				try {
+					cacheRepository.persist(responseCache);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		this.servletOutputStream.write(b, off, len);
@@ -51,15 +55,19 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(byte[] b) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			responseCache.addTextualContent(String.valueOf(b));
+			cacheRepository.addContent(responseCache, String.valueOf(b));
 		}
 		servletOutputStream.write(b);
 	}
 	
 	@Override
 	public void close() throws IOException {
-		if (this.responseCache.getTextualContent() != null) {
-			cacheRepository.persist(responseCache);
+		if (this.responseCache.getContent() != null) {
+			try {
+				cacheRepository.persist(responseCache);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
 		this.servletOutputStream.close();
 	}
