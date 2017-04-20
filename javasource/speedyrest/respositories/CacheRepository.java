@@ -94,13 +94,15 @@ public class CacheRepository {
 		return filePartsNew;
 	}
 	
-	public void addFilePart(ResponseCache responseCache, byte[] byteArray, int length) {
+	public void addFilePart(ResponseCache responseCache, byte[] byteArray, int length) throws CoreException {
+		persist(responseCache);
 		List<BinaryContent> fileParts = getFileParts(responseCache);
 		int numberFileParts = fileParts.size();
 		BinaryContent binaryContent = new BinaryContent(context);
 		binaryContent.setBinaryContent_ResponseCache(context, responseCache);
 		binaryContent.setContent(context, new ByteArrayInputStream(byteArray), length);
 		binaryContent.setPart(context, numberFileParts + 1);
+		binaryContent.commit();
 	}
 	
 	public void getBinaryContentContent(BinaryContent binaryContent, OutputStream outputStream) {

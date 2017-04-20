@@ -40,7 +40,12 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheRepository.addFilePart(responseCache, b, len);
+			try {
+				cacheRepository.addFilePart(responseCache, b, len);
+			} catch (CoreException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			if (len < 4096) {
 				try {
 					cacheRepository.persist(responseCache);
