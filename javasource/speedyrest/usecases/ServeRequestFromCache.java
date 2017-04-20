@@ -2,25 +2,26 @@ package speedyrest.usecases;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.http.Cookie;
 
+import com.mendix.core.Core;
 import com.mendix.externalinterface.connector.RequestHandler;
+import com.mendix.logging.ILogNode;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
 import speedyrest.entities.SpeedyResponse;
-import speedyrest.proxies.BinaryContent;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
 public class ServeRequestFromCache extends RequestHandler {
 
 	private CacheRepository cacheRepository;
+	private ILogNode logger;
 
 	public ServeRequestFromCache(CacheRepository cacheRepository) {
 		this.cacheRepository = cacheRepository;
@@ -28,33 +29,33 @@ public class ServeRequestFromCache extends RequestHandler {
 
 	@Override
 	protected void processRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
+		logger = Core.getLogger("SpeedyREST");
 
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
-		try {
-			System.out.println("Cachekey: " + cacheKey);
-			ResponseCache cachedResponse = cacheRepository.find(cacheKey);
-			serveFromCache(cachedResponse, response);
-		} catch(Exception e) {
+		
+		ResponseCache cachedResponse = cacheRepository.find(cacheKey);
+		if (cachedResponse.getKey() == null) {
+			logger.debug("Served request from REST module: " + cacheKey);
 			serveFromRest(cacheKey, request, response, path);
 		}
+		if (cachedResponse.getKey() != null) {
+			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
+			serveFromCache(cachedResponse, response);
+		}
+		
 	}
 
 	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {
-		System.out.println("Cache: YES");
 		setHeaders(response, responseCache);
 		setCookies(response, responseCache);
 		
 		if (responseCache.getContent() == null) {
-			List<BinaryContent> fileParts = cacheRepository.getFileParts(responseCache);
-			Iterator<BinaryContent> filePart = fileParts.iterator();
-			
-			while (filePart.hasNext()) {
-				cacheRepository.getBinaryContentContent(filePart.next(), response.getOutputStream());
-			}
+			cacheRepository.getBinaryContent(responseCache, response.getOutputStream());
 		}
 		
-		if (cacheRepository.getContent(responseCache).length() > 0) {
+		if (cacheRepository.getContent(responseCache) != null) {
 			response.getOutputStream().write(cacheRepository.getContent(responseCache).getBytes());
+			response.getOutputStream().close();
 		}
 	}
 	

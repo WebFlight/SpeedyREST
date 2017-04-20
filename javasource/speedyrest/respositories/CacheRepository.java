@@ -1,15 +1,16 @@
 package speedyrest.respositories;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
 
+import com.google.common.primitives.Bytes;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mendix.core.Core;
@@ -18,7 +19,6 @@ import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 
 import speedyrest.entities.SpeedyHeaders;
-import speedyrest.proxies.BinaryContent;
 import speedyrest.proxies.ResponseCache;
 
 public class CacheRepository {
@@ -31,6 +31,9 @@ public class CacheRepository {
 	
 	public ResponseCache find(String cacheKey) throws CoreException {
 		List<IMendixObject> objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.ResponseCache[Key='" + cacheKey + "']");
+		if (objectList.size() == 0) {
+			return new ResponseCache(context);
+		}
 		return ResponseCache.initialize(context, objectList.get(0));
 	}
 
@@ -82,31 +85,33 @@ public class CacheRepository {
 		responseCache.setCookies(context, serializeCookies(cookies));
 	}
 
-	public List<BinaryContent> getFileParts(ResponseCache responseCache) {
-		List<IMendixObject> fileParts = Core.retrieveByPath(context, responseCache.getMendixObject(), "SpeedyREST.BinaryContent_ResponseCache");
-		List<BinaryContent> filePartsNew = new LinkedList<>();
-		Iterator<IMendixObject> filePart = fileParts.iterator();
-		int counter = 0;
-		while(filePart.hasNext()) {
-			filePartsNew.add(counter, BinaryContent.initialize(context, filePart.next()));
-			counter++;
+	public void getBinaryContent(ResponseCache responseCache, OutputStream outputStream) {
+		responseCache.getBinaryContent(context, outputStream);
+	}
+	
+	public void addBinaryContent(ResponseCache responseCache, byte[] byteArray, int length) throws IOException {
+		ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
+		byte[] bOld = null;
+		byte[] bNew  = null;
+		int oldLength = 0;
+		
+		try {
+			getBinaryContent(responseCache, bOutput);
+			bOutput.close();
+			bOld = bOutput.toByteArray();
 		}
-		return filePartsNew;
-	}
-	
-	public void addFilePart(ResponseCache responseCache, byte[] byteArray, int length) throws CoreException {
-		persist(responseCache);
-		List<BinaryContent> fileParts = getFileParts(responseCache);
-		int numberFileParts = fileParts.size();
-		BinaryContent binaryContent = new BinaryContent(context);
-		binaryContent.setBinaryContent_ResponseCache(context, responseCache);
-		binaryContent.setContent(context, new ByteArrayInputStream(byteArray), length);
-		binaryContent.setPart(context, numberFileParts + 1);
-		binaryContent.commit();
-	}
-	
-	public void getBinaryContentContent(BinaryContent binaryContent, OutputStream outputStream) {
-		binaryContent.getContent(context, outputStream);
+		catch (Exception e) {
+			
+		}
+		if (bOld != null) {
+			bNew = Bytes.concat(bOld, byteArray);
+			oldLength = bOld.length;
+		}
+		else{
+			bNew = byteArray;
+		}
+		
+		responseCache.setBinaryContent(context, new ByteArrayInputStream(bNew), oldLength + length);
 	}
 	
 	private SpeedyHeaders deserializeHeaders(String headerString) {
