@@ -28,10 +28,10 @@ Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](htt
 
 ## Configuraton
 Configuration is done by setting constants in the config folder in the *SpeedyREST* module.
-Constant | Description | Default value
------------- | ------------- | -------------
-CACHE_FILE_CONTENT | If set to true, binary content (files and images) will be cached too. Be aware that this will consume additional database space. | false
-CACHE_TTL | Specify the TTL for cache entries in seconds. If set to 0, cache entries will never expire. | 86400 seconds (1 day)
+| Constant | Description | Default value |
+| ------------ | ------------- | ------------- |
+| CACHE_FILE_CONTENT | If set to true, binary content (files and images) will be cached too. Be aware that this will consume additional database space. | false |
+| CACHE_TTL | Specify the TTL for cache entries in seconds. If set to 0, cache entries will never expire. | 86400 seconds (1 day) |
 
 # Development notes
 * Unit tests are not yet finished. Work in progress.
