@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -51,6 +51,14 @@ public class CacheRepository {
 	
 	public String getContent(ResponseCache responseCache) {
 		return responseCache.getContent(context);
+	}
+	
+	public String getKey(ResponseCache responseCache) {
+		return responseCache.getKey(context);
+	}
+	
+	public Date getDateTimeCreated(ResponseCache responseCache) throws CoreException {
+		return responseCache.getMendixObject().getCreatedDate(context);
 	}
 	
 	public void addContent(ResponseCache responseCache, String content) {
@@ -116,13 +124,21 @@ public class CacheRepository {
 		responseCache.setBinaryContent(context, new ByteArrayInputStream(bNew), oldLength + length);
 	}
 	
+	public boolean cacheFileContent() {
+		return  Constants.getCACHE_FILE_CONTENT();
+	}
+	
+	public long cacheTTL() {
+		return  Constants.getCACHE_TTL();
+	}
+	
+	public void clearCacheEntry(ResponseCache responseCache) {
+		Core.delete(context, responseCache.getMendixObject());
+	}
+	
 	private SpeedyHeaders deserializeHeaders(String headerString) {
 		Gson gson = new Gson();
 		return gson.fromJson(headerString, SpeedyHeaders.class);
-	}
-	
-	public boolean cacheFileContent() {
-		return  Constants.getCACHE_FILE_CONTENT();
 	}
 	
 	private String serializeHeaders(SpeedyHeaders speedyHeaders) {

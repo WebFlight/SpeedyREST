@@ -1,6 +1,7 @@
 package speedyrest.usecases;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,6 +9,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.Cookie;
 
 import com.mendix.core.Core;
+import com.mendix.core.CoreException;
 import com.mendix.externalinterface.connector.RequestHandler;
 import com.mendix.logging.ILogNode;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -33,14 +35,20 @@ public class ServeRequestFromCache extends RequestHandler {
 
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
 		
-		ResponseCache cachedResponse = cacheRepository.find(cacheKey);
-		if (cachedResponse.getKey() == null) {
+		ResponseCache responseCache = cacheRepository.find(cacheKey);
+		
+		if (!isValid(responseCache)) {
+			cacheRepository.clearCacheEntry(responseCache);
+			responseCache = cacheRepository.createResponseCache(null);
+		}
+		
+		if (!isFound(responseCache)) {
 			logger.debug("Served request from REST module: " + cacheKey);
 			serveFromRest(cacheKey, request, response, path);
 		}
-		if (cachedResponse.getKey() != null) {
+		if (isFound(responseCache)) {
 			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
-			serveFromCache(cachedResponse, response);
+			serveFromCache(responseCache, response);
 		}
 		
 	}
@@ -81,5 +89,22 @@ public class ServeRequestFromCache extends RequestHandler {
 			Map.Entry<String, String> header = headerIterator.next();
 			response.getHttpServletResponse().addHeader(header.getKey(), header.getValue());
 		}
+	}
+	
+	private boolean isValid(ResponseCache responseCache) throws CoreException {
+		if (cacheRepository.cacheTTL() == 0) {
+			return true;
+		}
+		Date dateTimeCreated = cacheRepository.getDateTimeCreated(responseCache);
+		long duration = (System.currentTimeMillis() - dateTimeCreated.getTime())/1000;
+		logger.debug("Duration: " + duration + " seconds. Valid: " + (duration <= cacheRepository.cacheTTL()));
+		return (duration <= cacheRepository.cacheTTL());
+	}
+	
+	private boolean isFound(ResponseCache responseCache) {
+		if (cacheRepository.getKey(responseCache) != null) {
+			return true;
+		}
+		return false;
 	}
 }
