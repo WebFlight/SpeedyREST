@@ -41,13 +41,6 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (isGetRequest() && isHttpStatusSuccess() && cacheRepository.cacheFileContent()) {
 			cacheRepository.addBinaryContent(responseCache, b, len);
-			if (len < 4096) {
-				try {
-					cacheRepository.persist(responseCache);
-				} catch (CoreException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 		this.servletOutputStream.write(b, off, len);
 	}
@@ -70,11 +63,6 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 			}
 		}
 		this.servletOutputStream.close();
-	}
-	
-	@Override
-	public void flush() throws IOException {
-		
 	}
 	
 	private boolean isGetRequest () {
