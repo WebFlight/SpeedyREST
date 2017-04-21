@@ -37,3 +37,4 @@ Configuration is done by setting constants in the config folder in the *SpeedyRE
 # Development notes
 * Unit tests are not yet finished. Work in progress.
 * Mendix security is not yet implemented. As a result, cached REST responses are publicly accessible.
+* For contributions, fork this repository and issue a pull request.
