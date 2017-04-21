@@ -28,6 +28,7 @@ Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](htt
 
 ## Configuraton
 Configuration is done by setting constants in the config folder in the *SpeedyREST* module.
+
 | Constant | Description | Default value |
 | ------------ | ------------- | ------------- |
 | CACHE_FILE_CONTENT | If set to true, binary content (files and images) will be cached too. Be aware that this will consume additional database space. | false |
