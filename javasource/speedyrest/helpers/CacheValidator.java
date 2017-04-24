@@ -11,17 +11,19 @@ import speedyrest.respositories.CacheRepository;
 public class CacheValidator {
 	
 	public static boolean isValid(ResponseCache responseCache, CacheRepository cacheRepository, ILogNode logger) throws CoreException {
-		if (cacheRepository.cacheTTL() == 0) {
+		long cacheTTL = cacheRepository.cacheTTL();
+		if (cacheTTL == 0) {
 			return true;
 		}
 		Date dateTimeCreated = cacheRepository.getDateTimeCreated(responseCache);
 		long duration = (System.currentTimeMillis() - dateTimeCreated.getTime())/1000;
-		logger.debug("Duration: " + duration + " seconds. Valid: " + (duration <= cacheRepository.cacheTTL()));
-		return (duration <= cacheRepository.cacheTTL());
+		boolean isValid = duration <= cacheTTL;
+		logger.debug("Duration: " + duration + " seconds. Valid: " + (isValid));
+		return isValid;
 	}
 	
 	public static boolean isNotValid(ResponseCache responseCache, CacheRepository cacheRepository, ILogNode logger) throws CoreException {
-		return !isValid(responseCache, cacheRepository, logger);
+		return !CacheValidator.isValid(responseCache, cacheRepository, logger);
 	}
 	
 	public static boolean isFound(ResponseCache responseCache, CacheRepository cacheRepository) {
@@ -32,6 +34,6 @@ public class CacheValidator {
 	}
 	
 	public static boolean isNotFound(ResponseCache responseCache, CacheRepository cacheRepository) {
-		return !isFound(responseCache, cacheRepository);
+		return !CacheValidator.isFound(responseCache, cacheRepository);
 	}
 }
