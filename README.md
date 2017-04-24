@@ -2,6 +2,8 @@
 
 Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](http://www.mendix.com) apps to improve the speed of REST published services. SpeedyREST created a wrapper around the Rest Services module in order to cache the response in the database.
 
+![SpeedyREST logo](https://appstore.home.mendix.com/logo/image?id=54689&changeddate=1492783628174)
+
 ## Related resources
 * Rest Services on [Mendix App Store](https://appstore.home.mendix.com/link/app/997/Mendix/Rest-Services)
 
