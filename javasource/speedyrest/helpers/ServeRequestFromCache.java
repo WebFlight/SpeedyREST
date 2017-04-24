@@ -1,4 +1,4 @@
-package speedyrest.usecases;
+package speedyrest.helpers;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -7,31 +7,26 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.Cookie;
 
-import com.mendix.core.Core;
-import com.mendix.externalinterface.connector.RequestHandler;
 import com.mendix.logging.ILogNode;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
 import speedyrest.entities.SpeedyResponse;
-import speedyrest.helpers.CacheValidator;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
-public class ServeRequestFromCache extends RequestHandler {
-
+public class ServeRequestFromCache {
+	
 	private CacheRepository cacheRepository;
 	private ILogNode logger;
-
-	public ServeRequestFromCache(CacheRepository cacheRepository) {
+	
+	public ServeRequestFromCache (CacheRepository cacheRepository, ILogNode logger) {
 		this.cacheRepository = cacheRepository;
+		this.logger = logger;
 	}
-
-	@Override
-	protected void processRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
-		logger = Core.getLogger("SpeedyREST");
-
+	
+	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
 		
 		ResponseCache responseCache = cacheRepository.find(cacheKey);
@@ -49,9 +44,8 @@ public class ServeRequestFromCache extends RequestHandler {
 			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
 			serveFromCache(responseCache, response);
 		}
-		
 	}
-
+	
 	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {
 		setHeaders(response, responseCache);
 		setCookies(response, responseCache);

@@ -13,7 +13,7 @@ import com.mendix.core.Core;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
 import speedyrest.respositories.CacheRepository;
-import speedyrest.usecases.ServeRequestFromCache;
+import speedyrest.usecases.ServeRequestFromCacheHandler;
 
 public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 {
@@ -28,7 +28,7 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 		// BEGIN USER CODE
 		CacheRepository cacheRepository = new CacheRepository(this.getContext());
 		
-		Core.addRequestHandler("srest/", new ServeRequestFromCache(cacheRepository));
+		Core.addRequestHandler("srest/", new ServeRequestFromCacheHandler(cacheRepository));
 		
 		Core.getLogger("SpeedyREST").info("Registered SpeedyREST requesthandler for 'srest/'");
 		return true;
