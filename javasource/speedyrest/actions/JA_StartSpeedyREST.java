@@ -12,6 +12,8 @@ package speedyrest.actions;
 import com.mendix.core.Core;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
+import restservices.publish.RestServiceHandler;
+import speedyrest.helpers.CacheValidator;
 import speedyrest.respositories.CacheRepository;
 import speedyrest.usecases.ServeRequestFromCacheHandler;
 
@@ -26,9 +28,12 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
+		CacheValidator cacheValidator = new CacheValidator();
+		RestServiceHandler restServiceHandler = new RestServiceHandler();
 		CacheRepository cacheRepository = new CacheRepository(this.getContext());
 		
-		Core.addRequestHandler("srest/", new ServeRequestFromCacheHandler(cacheRepository));
+		Core.addRequestHandler("srest/", 
+				new ServeRequestFromCacheHandler(cacheRepository, cacheValidator, restServiceHandler));
 		
 		Core.getLogger("SpeedyREST").info("Registered SpeedyREST requesthandler for 'srest/'");
 		return true;

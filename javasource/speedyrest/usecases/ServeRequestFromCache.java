@@ -1,4 +1,4 @@
-package speedyrest.helpers;
+package speedyrest.usecases;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -13,34 +13,37 @@ import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
 import speedyrest.entities.SpeedyResponse;
+import speedyrest.helpers.CacheValidator;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
 public class ServeRequestFromCache {
 	
 	private CacheRepository cacheRepository;
+	private CacheValidator cacheValidator;
 	private ILogNode logger;
 	
-	public ServeRequestFromCache (CacheRepository cacheRepository, ILogNode logger) {
+	public ServeRequestFromCache (CacheRepository cacheRepository, CacheValidator cacheValidator, ILogNode logger) {
 		this.cacheRepository = cacheRepository;
+		this.cacheValidator = cacheValidator;
 		this.logger = logger;
 	}
 	
-	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
+	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path, RestServiceHandler restServiceHandler) throws Exception {
 		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
 		
 		ResponseCache responseCache = cacheRepository.find(cacheKey);
 		
-		if (CacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
+		if (cacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
 			cacheRepository.clearCacheEntry(responseCache);
 			responseCache = cacheRepository.createResponseCache(null);
 		}
 		
-		if (CacheValidator.isNotFound(responseCache, cacheRepository)) {
+		if (cacheValidator.isNotFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from REST module: " + cacheKey);
-			serveFromRest(cacheKey, request, response, path);
+			serveFromRest(cacheKey, request, response, path, restServiceHandler);
 		}
-		if (CacheValidator.isFound(responseCache, cacheRepository)) {
+		if (cacheValidator.isFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
 			serveFromCache(responseCache, response);
 		}
@@ -60,11 +63,10 @@ public class ServeRequestFromCache {
 		}
 	}
 	
-	private void serveFromRest(String cacheKey, IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
-		RestServiceHandler handler = new RestServiceHandler();
+	private void serveFromRest(String cacheKey, IMxRuntimeRequest request, IMxRuntimeResponse response, String path, RestServiceHandler restServiceHandler) throws Exception {
 		ResponseCache responseCache = this.cacheRepository.createResponseCache(cacheKey);
 		SpeedyResponse speedyResponse = new SpeedyResponse(request, response, responseCache, cacheRepository);
-		handler.processRequest(request, speedyResponse, path);
+		restServiceHandler.processRequest(request, speedyResponse, path);
 	}
 	
 	private void setCookies(IMxRuntimeResponse response, ResponseCache cachedResponse) {

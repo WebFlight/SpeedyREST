@@ -23,6 +23,7 @@ public class CacheValidatorTest {
 	private ResponseCache responseCache;
 	private CacheRepository cacheRepository;
 	private ILogNode logger;
+	private CacheValidator cacheValidator = new CacheValidator();
 	
 
 	@Before
@@ -30,14 +31,12 @@ public class CacheValidatorTest {
 		this.responseCache = mock(ResponseCache.class);
 		this.cacheRepository = mock(CacheRepository.class);
 		this.logger = mock(ILogNode.class);
-		@SuppressWarnings("unused")
-		CacheValidator cacheValidator = new CacheValidator();
 	}
 
 	@Test
 	public void testIsValidUnlimitedTTL() throws CoreException {
 		when(cacheRepository.cacheTTL()).thenReturn(0L);
-		assertTrue(CacheValidator.isValid(responseCache, cacheRepository, logger));
+		assertTrue(cacheValidator.isValid(responseCache, cacheRepository, logger));
 		verify(cacheRepository , times(1)).cacheTTL();
 	}
 	
@@ -45,7 +44,7 @@ public class CacheValidatorTest {
 	public void testIsValidTrue() throws CoreException {
 		when(cacheRepository.cacheTTL()).thenReturn(100L);
 		when(cacheRepository.getDateTimeCreated(responseCache)).thenReturn(new Date(System.currentTimeMillis()));
-		assertTrue(CacheValidator.isValid(responseCache, cacheRepository, logger));
+		assertTrue(cacheValidator.isValid(responseCache, cacheRepository, logger));
 		verify(cacheRepository , times(1)).cacheTTL();
 		verify(cacheRepository , times(1)).getDateTimeCreated(responseCache);
 	}
@@ -55,7 +54,7 @@ public class CacheValidatorTest {
 		when(cacheRepository.cacheTTL()).thenReturn(100L);
 		when(cacheRepository.getDateTimeCreated(responseCache)).thenReturn(
 				new Date(System.currentTimeMillis() - (200 * 1000)));
-		assertFalse(CacheValidator.isValid(responseCache, cacheRepository, logger));
+		assertFalse(cacheValidator.isValid(responseCache, cacheRepository, logger));
 		verify(cacheRepository , times(1)).cacheTTL();
 		verify(cacheRepository , times(1)).getDateTimeCreated(responseCache);
 	}
@@ -65,7 +64,7 @@ public class CacheValidatorTest {
 		when(cacheRepository.cacheTTL()).thenReturn(100L);
 		when(cacheRepository.getDateTimeCreated(responseCache)).thenReturn(
 				new Date(System.currentTimeMillis() - (200 * 1000)));
-		assertTrue(CacheValidator.isNotValid(responseCache, cacheRepository, logger));
+		assertTrue(cacheValidator.isNotValid(responseCache, cacheRepository, logger));
 		verify(cacheRepository , times(1)).cacheTTL();
 		verify(cacheRepository , times(1)).getDateTimeCreated(responseCache);
 	}
@@ -74,7 +73,7 @@ public class CacheValidatorTest {
 	public void testIsNotValidFalse() throws CoreException {
 		when(cacheRepository.cacheTTL()).thenReturn(100L);
 		when(cacheRepository.getDateTimeCreated(responseCache)).thenReturn(new Date(System.currentTimeMillis()));
-		assertFalse(CacheValidator.isNotValid(responseCache, cacheRepository, logger));
+		assertFalse(cacheValidator.isNotValid(responseCache, cacheRepository, logger));
 		verify(cacheRepository , times(1)).cacheTTL();
 		verify(cacheRepository , times(1)).getDateTimeCreated(responseCache);
 	}
@@ -82,28 +81,28 @@ public class CacheValidatorTest {
 	@Test
 	public void testIsFoundTrue() {
 		when(cacheRepository.getKey(responseCache)).thenReturn("testkey");
-		assertTrue(CacheValidator.isFound(responseCache, cacheRepository));
+		assertTrue(cacheValidator.isFound(responseCache, cacheRepository));
 		verify(cacheRepository, times(1)).getKey(responseCache);
 	}
 	
 	@Test
 	public void testIsFoundFalse() {
 		when(cacheRepository.getKey(responseCache)).thenReturn(null);
-		assertFalse(CacheValidator.isFound(responseCache, cacheRepository));
+		assertFalse(cacheValidator.isFound(responseCache, cacheRepository));
 		verify(cacheRepository, times(1)).getKey(responseCache);
 	}
 
 	@Test
 	public void testIsNotFoundTrue() {
 		when(cacheRepository.getKey(responseCache)).thenReturn(null);
-		assertTrue(CacheValidator.isNotFound(responseCache, cacheRepository));
+		assertTrue(cacheValidator.isNotFound(responseCache, cacheRepository));
 		verify(cacheRepository, times(1)).getKey(responseCache);
 	}
 	
 	@Test
 	public void testIsNotFoundFalse() {
 		when(cacheRepository.getKey(responseCache)).thenReturn("testkey");
-		assertFalse(CacheValidator.isNotFound(responseCache, cacheRepository));
+		assertFalse(cacheValidator.isNotFound(responseCache, cacheRepository));
 		verify(cacheRepository, times(1)).getKey(responseCache);
 	}
 }
