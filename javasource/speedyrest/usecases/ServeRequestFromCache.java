@@ -1,7 +1,6 @@
 package speedyrest.usecases;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,7 +8,6 @@ import java.util.Map.Entry;
 import javax.servlet.http.Cookie;
 
 import com.mendix.core.Core;
-import com.mendix.core.CoreException;
 import com.mendix.externalinterface.connector.RequestHandler;
 import com.mendix.logging.ILogNode;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -17,6 +15,7 @@ import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
 import speedyrest.entities.SpeedyResponse;
+import speedyrest.helpers.CacheValidator;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
@@ -37,16 +36,16 @@ public class ServeRequestFromCache extends RequestHandler {
 		
 		ResponseCache responseCache = cacheRepository.find(cacheKey);
 		
-		if (!isValid(responseCache)) {
+		if (CacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
 			cacheRepository.clearCacheEntry(responseCache);
 			responseCache = cacheRepository.createResponseCache(null);
 		}
 		
-		if (!isFound(responseCache)) {
+		if (CacheValidator.isNotFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from REST module: " + cacheKey);
 			serveFromRest(cacheKey, request, response, path);
 		}
-		if (isFound(responseCache)) {
+		if (CacheValidator.isFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
 			serveFromCache(responseCache, response);
 		}
@@ -89,22 +88,5 @@ public class ServeRequestFromCache extends RequestHandler {
 			Map.Entry<String, String> header = headerIterator.next();
 			response.getHttpServletResponse().addHeader(header.getKey(), header.getValue());
 		}
-	}
-	
-	private boolean isValid(ResponseCache responseCache) throws CoreException {
-		if (cacheRepository.cacheTTL() == 0) {
-			return true;
-		}
-		Date dateTimeCreated = cacheRepository.getDateTimeCreated(responseCache);
-		long duration = (System.currentTimeMillis() - dateTimeCreated.getTime())/1000;
-		logger.debug("Duration: " + duration + " seconds. Valid: " + (duration <= cacheRepository.cacheTTL()));
-		return (duration <= cacheRepository.cacheTTL());
-	}
-	
-	private boolean isFound(ResponseCache responseCache) {
-		if (cacheRepository.getKey(responseCache) != null) {
-			return true;
-		}
-		return false;
 	}
 }
