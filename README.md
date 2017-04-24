@@ -9,6 +9,7 @@ Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](htt
 
 * [Getting Started](#getting-started)
 * [Application](#application)
+* [Technical implementation](#technical-implementation)
 * [Development Notes](#development-notes)
 
 # Getting started
@@ -18,21 +19,27 @@ Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](htt
 4. Integrate the ResponseCache_Overview snippet in a new page to get an overview of cached responses and configuration details.
 5. Include the *IVK_ClearCacheKey* microflow at places in your application where objects are modified. This will make sure that the related cached responses are cleared and recreated.
 6. Configure the constants *CACHE_FILE_CONTENT* and *CACHE_TTL*. See the [configuration](#configuration) section for more details.
-
-# Application
-
-## Technical description
-* The module adds the /srest request handler to the application. 
-* Whenever a request is done at the /srest path, SpeedyREST checks whether the response of this path is already cached. If not, the REST module will be used to retrieve the response and feed it to the OutputStream (browser). The SpeedyResponse class, which implements the IMxRuntimeResponse interface, is feeded into the REST module and makes sure that everything written to the OutputStream, is stored in the database as a ResponseCache object. Objects will be cached only if the HTTP status is 200 and the request method is GET.
-* If an object is found in the cache, the cached response will be send to the OutputStream. Headers and cookies are cached too and will be set identical to the output of the REST module the first time the first time the response was cached.
+7. Access your REST service and replace /rest by /srest in your URL.
 
 ## Configuration
-Configuration is done by setting constants in the config folder in the *SpeedyREST* module.
+Configuration is done by modification of constants in the config folder in the *SpeedyREST* module.
 
 | Constant | Description | Default value |
 | ------------ | ------------- | ------------- |
 | CACHE_FILE_CONTENT | If set to true, binary content (files and images) will be cached too. Be aware that this will consume additional database space. | false |
 | CACHE_TTL | Specify the TTL for cache entries in seconds. If set to 0, cache entries will never expire. | 86400 seconds (1 day) |
+
+# Application
+Response time of serving REST requests is likely to be slow, especially when REST requests involve:
+* Retrieving many objects
+* Retrieving objects over associations
+* Retrieving using (multiple) XPaths
+In some applications this is not desirable, especially when the response is used in webpages or apps the user wants to see instant response.
+
+# Technical implementation
+* The module adds the /srest request handler to the application. 
+* Whenever a request is done at the /srest path, SpeedyREST checks whether the response of this path is already cached. If not, the REST module will be used to retrieve the response and feed it to the OutputStream (browser). The SpeedyResponse class, which implements the IMxRuntimeResponse interface, is feeded into the REST module and makes sure that everything written to the OutputStream, is stored in the database as a ResponseCache object. Objects will be cached only if the HTTP status is 200 and the request method is GET.
+* If an object is found in the cache, the cached response will be send to the OutputStream. Headers and cookies are cached too and will be set identical to the output of the REST module the first time the first time the response was cached.
 
 # Development notes
 * Unit tests are not yet finished. Work in progress.
