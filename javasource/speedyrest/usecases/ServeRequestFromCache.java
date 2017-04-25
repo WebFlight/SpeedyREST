@@ -29,11 +29,7 @@ public class ServeRequestFromCache {
 		this.logger = logger;
 	}
 	
-	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path, RestServiceHandler restServiceHandler) throws Exception {
-		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
-		
-		ResponseCache responseCache = cacheRepository.find(cacheKey);
-		
+	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path, String cacheKey, RestServiceHandler restServiceHandler, ResponseCache responseCache, SpeedyResponse speedyResponse) throws Exception {
 		if (cacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
 			cacheRepository.clearCacheEntry(responseCache);
 			responseCache = cacheRepository.createResponseCache(null);
@@ -41,7 +37,7 @@ public class ServeRequestFromCache {
 		
 		if (cacheValidator.isNotFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from REST module: " + cacheKey);
-			serveFromRest(cacheKey, request, response, path, restServiceHandler);
+			serveFromRest(request, path, restServiceHandler, speedyResponse);
 		}
 		if (cacheValidator.isFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
@@ -52,20 +48,19 @@ public class ServeRequestFromCache {
 	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {
 		setHeaders(response, responseCache);
 		setCookies(response, responseCache);
+		String content = cacheRepository.getContent(responseCache);
 		
-		if (responseCache.getContent() == null) {
+		if (content == null) {
 			cacheRepository.getBinaryContent(responseCache, response.getOutputStream());
 		}
 		
-		if (cacheRepository.getContent(responseCache) != null) {
-			response.getOutputStream().write(cacheRepository.getContent(responseCache).getBytes());
+		if (content != null) {
+			response.getOutputStream().write(content.getBytes());
 			response.getOutputStream().close();
 		}
 	}
 	
-	private void serveFromRest(String cacheKey, IMxRuntimeRequest request, IMxRuntimeResponse response, String path, RestServiceHandler restServiceHandler) throws Exception {
-		ResponseCache responseCache = this.cacheRepository.createResponseCache(cacheKey);
-		SpeedyResponse speedyResponse = new SpeedyResponse(request, response, responseCache, cacheRepository);
+	private void serveFromRest(IMxRuntimeRequest request, String path, RestServiceHandler restServiceHandler, SpeedyResponse speedyResponse) throws Exception {
 		restServiceHandler.processRequest(request, speedyResponse, path);
 	}
 	

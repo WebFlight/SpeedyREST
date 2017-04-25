@@ -7,7 +7,9 @@ import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
+import speedyrest.entities.SpeedyResponse;
 import speedyrest.helpers.CacheValidator;
+import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
 
 public class ServeRequestFromCacheHandler extends RequestHandler {
@@ -27,8 +29,12 @@ public class ServeRequestFromCacheHandler extends RequestHandler {
 	@Override
 	protected void processRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
 		logger = Core.getLogger("SpeedyREST");
+		String cacheKey = path + request.getHttpServletRequest().getParameterMap().toString();
+		ResponseCache responseCache = cacheRepository.find(cacheKey);
+		ResponseCache newResponseCache = cacheRepository.createResponseCache(cacheKey);
+		SpeedyResponse speedyResponse = new SpeedyResponse(request, response, newResponseCache, cacheRepository);
 		ServeRequestFromCache serveRequestFromCache = new ServeRequestFromCache(cacheRepository, cacheValidator, logger);
-		serveRequestFromCache.serveRequest(request, response, path, restServiceHandler);
+		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler, responseCache, speedyResponse);
 	}
 	
 }
