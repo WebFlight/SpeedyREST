@@ -44,6 +44,5 @@ In some applications this is not desirable, especially when the response is used
 * If an object is found in the cache, the cached response will be send to the OutputStream. Headers and cookies are cached too and will be set identical to the output of the REST module the first time the first time the response was cached.
 
 # Development notes
-* Unit tests are not yet finished. Work in progress.
-* Mendix security is not yet implemented. As a result, cached REST responses are publicly accessible.
-* For contributions, fork this repository and issue a pull request.
+* Mendix security is not implemented. As a result, cached REST responses are publicly accessible.
+* For contributions: fork this repository, make changes, fix/add unit tests in speedyrest.tests package and issue pull request.
