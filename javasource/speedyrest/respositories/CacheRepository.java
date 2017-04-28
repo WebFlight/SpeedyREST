@@ -1,7 +1,6 @@
 package speedyrest.respositories;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import javax.servlet.http.Cookie;
 
-import com.google.common.primitives.Bytes;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mendix.core.Core;
@@ -19,6 +17,7 @@ import com.mendix.core.CoreException;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 
+import speedyrest.entities.BinaryContentCache;
 import speedyrest.entities.SpeedyHeaders;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.proxies.constants.Constants;
@@ -26,6 +25,7 @@ import speedyrest.proxies.constants.Constants;
 public class CacheRepository {
 
 	private IContext context;
+	private BinaryContentCache binaryContentCache;
 
 	public CacheRepository(IContext context) {
 		this.context = context;
@@ -100,30 +100,10 @@ public class CacheRepository {
 	}
 	
 	public void addBinaryContent(ResponseCache responseCache, byte[] byteArray, int length) throws IOException {
-		ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
-		byte[] bOld = null;
-		byte[] bNew  = null;
-		int oldLength = 0;
-		
-		try {
-			getBinaryContent(responseCache, bOutput);
-			bOutput.close();
-			bOld = bOutput.toByteArray();
-		}
-		catch (Exception e) {
-			
-		}
-		if (bOld != null) {
-			bNew = Bytes.concat(bOld, byteArray);
-			oldLength = bOld.length;
-		}
-		if (bOld == null) {
-			bNew = byteArray;
-		}
-		
-		responseCache.setBinaryContent(context, new ByteArrayInputStream(bNew), oldLength + length);
+		BinaryContentCache binaryContentCache = getBinaryContentCache();
+		binaryContentCache.addBinaryContentCache(byteArray, length);
 	}
-	
+		
 	public boolean cacheFileContent() {
 		return  Constants.getCACHE_FILE_CONTENT();
 	}
@@ -164,5 +144,17 @@ public class CacheRepository {
 			return gson.toJson(cookies, collectionType);
 		}
 		return new String();
+	}
+	
+	public BinaryContentCache getBinaryContentCache() {
+		if (binaryContentCache == null) {
+			binaryContentCache = new BinaryContentCache();
+		}
+		
+		return binaryContentCache;
+	}
+	
+	public void setBinaryContentCache(ResponseCache responseCache, BinaryContentCache binaryContentCache) {
+		responseCache.setBinaryContent(context, new ByteArrayInputStream(binaryContentCache.getBinaryContentCache()), binaryContentCache.getLength());
 	}
 }

@@ -12,6 +12,7 @@ import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
+import speedyrest.entities.BinaryContentCache;
 import speedyrest.entities.SpeedyResponse;
 import speedyrest.helpers.CacheValidator;
 import speedyrest.proxies.ResponseCache;
@@ -29,7 +30,9 @@ public class ServeRequestFromCache {
 		this.logger = logger;
 	}
 	
-	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path, String cacheKey, RestServiceHandler restServiceHandler, ResponseCache responseCache, SpeedyResponse speedyResponse) throws Exception {
+	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path, String cacheKey, RestServiceHandler restServiceHandler) throws Exception {
+		ResponseCache responseCache = cacheRepository.find(cacheKey);
+		
 		if (cacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
 			cacheRepository.clearCacheEntry(responseCache);
 			responseCache = cacheRepository.createResponseCache(null);
@@ -37,7 +40,9 @@ public class ServeRequestFromCache {
 		
 		if (cacheValidator.isNotFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from REST module: " + cacheKey);
-			serveFromRest(request, path, restServiceHandler, speedyResponse);
+			ResponseCache newResponseCache = cacheRepository.createResponseCache(cacheKey);
+			SpeedyResponse speedyResponse = new SpeedyResponse(request, response, newResponseCache, cacheRepository);
+			serveFromRest(request, path, restServiceHandler, speedyResponse, newResponseCache);
 		}
 		if (cacheValidator.isFound(responseCache, cacheRepository)) {
 			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
@@ -60,8 +65,12 @@ public class ServeRequestFromCache {
 		}
 	}
 	
-	private void serveFromRest(IMxRuntimeRequest request, String path, RestServiceHandler restServiceHandler, SpeedyResponse speedyResponse) throws Exception {
+	private void serveFromRest(IMxRuntimeRequest request, String path, RestServiceHandler restServiceHandler, SpeedyResponse speedyResponse, ResponseCache responseCache) throws Exception {
 		restServiceHandler.processRequest(request, speedyResponse, path);
+		BinaryContentCache binaryContentCache = cacheRepository.getBinaryContentCache();
+		if (binaryContentCache.getLength() > 0) {
+			cacheRepository.setBinaryContentCache(responseCache, binaryContentCache);
+		}
 	}
 	
 	private void setCookies(IMxRuntimeResponse response, ResponseCache cachedResponse) {

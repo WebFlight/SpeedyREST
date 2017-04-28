@@ -96,7 +96,7 @@ public class ServeRequestFromCacheTest {
 		
 		ServeRequestFromCache serveRequestFromCache = new ServeRequestFromCache(cacheRepository, cacheValidator, logger);
 		
-		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler, responseCache, speedyResponse);
+		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler);
 		
 		verify(cacheRepository, times(1)).clearCacheEntry(responseCache);
 		verify(cacheRepository, times(1)).createResponseCache(null);
@@ -133,7 +133,7 @@ public class ServeRequestFromCacheTest {
 		
 		ServeRequestFromCache serveRequestFromCache = new ServeRequestFromCache(cacheRepository, cacheValidator, logger);
 		
-		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler, responseCache, speedyResponse);
+		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler);
 		
 		verify(cacheRepository, times(1)).getCookies(responseCache);
 		verify(cacheRepository, times(1)).getHeaders(responseCache);
@@ -173,7 +173,7 @@ public class ServeRequestFromCacheTest {
 		
 		ServeRequestFromCache serveRequestFromCache = new ServeRequestFromCache(cacheRepository, cacheValidator, logger);
 		
-		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler, responseCache, speedyResponse);
+		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler);
 		
 		verify(cacheRepository, times(1)).getCookies(responseCache);
 		verify(cacheRepository, times(1)).getHeaders(responseCache);
@@ -214,7 +214,7 @@ public class ServeRequestFromCacheTest {
 		
 		ServeRequestFromCache serveRequestFromCache = new ServeRequestFromCache(cacheRepository, cacheValidator, logger);
 		
-		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler, responseCache, speedyResponse);
+		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler);
 	}
 
 }
