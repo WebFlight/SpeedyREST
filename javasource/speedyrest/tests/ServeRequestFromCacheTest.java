@@ -54,6 +54,7 @@ public class ServeRequestFromCacheTest {
 	private OutputStream outputStream;
 	
 	
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		this.responseCache = mock(ResponseCache.class);
@@ -175,7 +176,6 @@ public class ServeRequestFromCacheTest {
 		verify(httpServletResponse, times(1)).addCookie(cookie);
 		verify(httpServletResponse, times(1)).addHeader(headerMapEntry.getKey(), headerMapEntry.getValue());
 		verify(cacheRepository, times(1)).getContent(responseCache);
-		verify(cacheRepository, times(1)).getBinaryContent(responseCache, outputStream);
 	}
 	
 	@Test(expected = NullPointerException.class)

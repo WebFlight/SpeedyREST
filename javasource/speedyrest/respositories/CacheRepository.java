@@ -1,15 +1,9 @@
 package speedyrest.respositories;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.Cookie;
 
@@ -20,7 +14,6 @@ import com.mendix.core.CoreException;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 
-import speedyrest.entities.BinaryContentCache;
 import speedyrest.entities.SpeedyHeaders;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.proxies.constants.Constants;
@@ -28,7 +21,6 @@ import speedyrest.proxies.constants.Constants;
 public class CacheRepository {
 
 	private IContext context;
-	private Map<String, BinaryContentCache> binaryContentCaches = new ConcurrentHashMap<>();
 
 	public CacheRepository(IContext context) {
 		this.context = context;
@@ -97,15 +89,6 @@ public class CacheRepository {
 		cookies.add(cookie);
 		responseCache.setCookies(context, serializeCookies(cookies));
 	}
-
-	public void getBinaryContent(ResponseCache responseCache, OutputStream outputStream) {
-		responseCache.getBinaryContent(context, outputStream);
-	}
-	
-	public void addBinaryContent(ResponseCache responseCache, byte[] byteArray, int length) throws IOException {
-		BinaryContentCache binaryContentCache = getBinaryContentCache(responseCache.getKey());
-		binaryContentCache.addBinaryContentCache(byteArray, length);
-	}
 		
 	public boolean cacheFileContent() {
 		return  Constants.getCACHE_FILE_CONTENT();
@@ -147,18 +130,5 @@ public class CacheRepository {
 			return gson.toJson(cookies, collectionType);
 		}
 		return new String();
-	}
-	
-	public BinaryContentCache getBinaryContentCache(String key) {
-		if (!binaryContentCaches.containsKey(key)) {
-			BinaryContentCache binaryContentCache = new BinaryContentCache();
-			binaryContentCaches.put(key, binaryContentCache);
-		}
-		return binaryContentCaches.get(key);
-	}
-	
-	public void setBinaryContentCache(ResponseCache responseCache, BinaryContentCache binaryContentCache) {
-		responseCache.setBinaryContent(context, new ByteArrayInputStream(binaryContentCache.getBinaryContentCache()), binaryContentCache.getLength());
-		binaryContentCaches.remove(responseCache.getKey());
 	}
 }

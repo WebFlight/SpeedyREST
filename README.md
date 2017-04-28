@@ -1,6 +1,6 @@
 # Mendix SpeedyREST module
 
-Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](http://www.mendix.com) apps to improve the speed of REST published services. SpeedyREST created a wrapper around the Rest Services module in order to cache the response in the database.
+Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](http://www.mendix.com) apps to improve the speed of REST published services. SpeedyREST created a wrapper around the Rest Services module in order to cache the response in the database. Binary content will not be cached, because the performance improvement is not significant.
 
 ![SpeedyREST logo][1]
 
@@ -20,7 +20,7 @@ Welcome to the Mendix SpeedyREST module. This module can be used in [Mendix](htt
 3. Include the *JA_StartSpeedyREST* Java action in your start-up microflow after initialization of Rest Services. The /srest request handler will be added.
 4. Integrate the ResponseCache_Overview snippet in a new page to get an overview of cached responses and configuration details.
 5. Include the *IVK_ClearCacheKey* microflow at places in your application where objects are modified. This will make sure that the related cached responses are cleared and recreated.
-6. Configure the constants *CACHE_FILE_CONTENT* and *CACHE_TTL*. See the [configuration](#configuration) section for more details.
+6. Configure the constant *CACHE_TTL*. See the [configuration](#configuration) section for more details.
 7. Access your REST service and replace /rest by /srest in your URL.
 
 ## Configuration
@@ -28,7 +28,7 @@ Configuration is done by modification of constants in the config folder in the *
 
 | Constant | Description | Default value |
 | ------------ | ------------- | ------------- |
-| CACHE_FILE_CONTENT | If set to true, binary content (files and images) will be cached too. Be aware that this will consume additional database space. | false |
+|
 | CACHE_TTL | Specify the TTL for cache entries in seconds. If set to 0, cache entries will never expire. | 86400 seconds (1 day) |
 
 # Application

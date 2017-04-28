@@ -12,7 +12,6 @@ import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
-import speedyrest.entities.BinaryContentCache;
 import speedyrest.entities.SpeedyResponse;
 import speedyrest.helpers.CacheValidator;
 import speedyrest.proxies.ResponseCache;
@@ -55,10 +54,6 @@ public class ServeRequestFromCache {
 		setCookies(response, responseCache);
 		String content = cacheRepository.getContent(responseCache);
 		
-		if (content == null) {
-			cacheRepository.getBinaryContent(responseCache, response.getOutputStream());
-		}
-		
 		if (content != null) {
 			response.getOutputStream().write(content.getBytes());
 			response.getOutputStream().close();
@@ -67,10 +62,6 @@ public class ServeRequestFromCache {
 	
 	private void serveFromRest(IMxRuntimeRequest request, String path, RestServiceHandler restServiceHandler, SpeedyResponse speedyResponse, ResponseCache responseCache) throws Exception {
 		restServiceHandler.processRequest(request, speedyResponse, path);
-		BinaryContentCache binaryContentCache = cacheRepository.getBinaryContentCache(responseCache.getKey());
-		if (binaryContentCache.getLength() > 0) {
-			cacheRepository.setBinaryContentCache(responseCache, binaryContentCache);
-		}
 	}
 	
 	private void setCookies(IMxRuntimeResponse response, ResponseCache cachedResponse) {
