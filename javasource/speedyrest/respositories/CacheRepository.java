@@ -89,10 +89,6 @@ public class CacheRepository {
 		cookies.add(cookie);
 		responseCache.setCookies(context, serializeCookies(cookies));
 	}
-		
-	public boolean cacheFileContent() {
-		return  Constants.getCACHE_FILE_CONTENT();
-	}
 	
 	public long cacheTTL() {
 		return  Constants.getCACHE_TTL();
