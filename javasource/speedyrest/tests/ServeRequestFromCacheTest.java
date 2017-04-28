@@ -1,7 +1,5 @@
 package speedyrest.tests;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +9,6 @@ import com.mendix.m2ee.api.IMxRuntimeResponse;
 
 import restservices.publish.RestServiceHandler;
 import speedyrest.entities.SpeedyHeaders;
-import speedyrest.entities.SpeedyResponse;
 import speedyrest.helpers.CacheValidator;
 import speedyrest.proxies.ResponseCache;
 import speedyrest.respositories.CacheRepository;
@@ -50,7 +47,6 @@ public class ServeRequestFromCacheTest {
 	private Map.Entry<String, String> headerMapEntry;
 	private Iterator<Entry<String, String>> headerIterator;
 	private RestServiceHandler restServiceHandler;
-	private SpeedyResponse speedyResponse;
 	private SpeedyHeaders speedyHeaders;
 	private List<Cookie> cookieList;
 	private Iterator<Cookie> cookieIterator;
@@ -70,7 +66,6 @@ public class ServeRequestFromCacheTest {
 		this.httpServletResponse = mock(HttpServletResponse.class);
 		this.parameterMap = mock(Map.class);
 		this.headerMap = mock(HashMap.class);
-		this.speedyResponse = mock(SpeedyResponse.class);
 		this.speedyHeaders = mock(SpeedyHeaders.class);
 		this.headerMapEntrySet = mock(Set.class);
 		this.headerMapEntry = mock(Map.Entry.class);

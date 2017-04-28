@@ -6,7 +6,7 @@ public class BinaryContentCache {
 	
 	private byte[] binaryContentCache = new byte[0];
 	private int length = 0;
-
+	
 	public int getLength() {
 		return length;
 	}

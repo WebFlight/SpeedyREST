@@ -67,7 +67,7 @@ public class ServeRequestFromCache {
 	
 	private void serveFromRest(IMxRuntimeRequest request, String path, RestServiceHandler restServiceHandler, SpeedyResponse speedyResponse, ResponseCache responseCache) throws Exception {
 		restServiceHandler.processRequest(request, speedyResponse, path);
-		BinaryContentCache binaryContentCache = cacheRepository.getBinaryContentCache();
+		BinaryContentCache binaryContentCache = cacheRepository.getBinaryContentCache(responseCache.getKey());
 		if (binaryContentCache.getLength() > 0) {
 			cacheRepository.setBinaryContentCache(responseCache, binaryContentCache);
 		}
