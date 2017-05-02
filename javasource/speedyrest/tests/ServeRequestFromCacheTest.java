@@ -84,6 +84,7 @@ public class ServeRequestFromCacheTest {
 		
 		when(request.getHttpServletRequest()).thenReturn(httpServletRequest);
 		when(httpServletRequest.getParameterMap()).thenReturn(parameterMap);
+		when(httpServletRequest.getMethod()).thenReturn("GET");
 		when(parameterMap.toString()).thenReturn("{}");
 		when(cacheRepository.find(cacheKey)).thenReturn(responseCache);
 		when(cacheRepository.createResponseCache(null)).thenReturn(responseCache);
@@ -105,6 +106,7 @@ public class ServeRequestFromCacheTest {
 		
 		when(request.getHttpServletRequest()).thenReturn(httpServletRequest);
 		when(httpServletRequest.getParameterMap()).thenReturn(parameterMap);
+		when(httpServletRequest.getMethod()).thenReturn("GET");
 		when(parameterMap.toString()).thenReturn("{}");
 		when(cacheRepository.find(cacheKey)).thenReturn(responseCache);
 		when(cacheRepository.createResponseCache(null)).thenReturn(responseCache);
@@ -138,8 +140,8 @@ public class ServeRequestFromCacheTest {
 		verify(cacheRepository, times(1)).getContent(responseCache);
 	}
 	
-	@Test
-	public void testProcessRequestCacheValidServeFromCacheBinary() throws Exception {
+	@Test(expected = NullPointerException.class)
+	public void testProcessRequestCacheValidServeFromRest() throws Exception {
 		String path = "testpath";
 		String cacheKey = "testpath{}";
 		
@@ -153,8 +155,8 @@ public class ServeRequestFromCacheTest {
 		when(cacheRepository.getContent(responseCache)).thenReturn(null);
 		when(speedyHeaders.getHeaders()).thenReturn(headerMap);
 		when(cacheValidator.isNotValid(responseCache, cacheRepository, logger)).thenReturn(false);
-		when(cacheValidator.isNotFound(responseCache, cacheRepository)).thenReturn(false);
-		when(cacheValidator.isFound(responseCache, cacheRepository)).thenReturn(true);
+		when(cacheValidator.isNotFound(responseCache, cacheRepository)).thenReturn(true);
+		when(cacheValidator.isFound(responseCache, cacheRepository)).thenReturn(false);
 		when(headerMap.entrySet()).thenReturn(headerMapEntrySet);
 		when(headerMapEntrySet.iterator()).thenReturn(headerIterator);
 		when(headerIterator.hasNext()).thenReturn(true, false);
@@ -170,20 +172,15 @@ public class ServeRequestFromCacheTest {
 		ServeRequestFromCache serveRequestFromCache = new ServeRequestFromCache(cacheRepository, cacheValidator, logger);
 		
 		serveRequestFromCache.serveRequest(request, response, path, cacheKey, restServiceHandler);
-		
-		verify(cacheRepository, times(1)).getCookies(responseCache);
-		verify(cacheRepository, times(1)).getHeaders(responseCache);
-		verify(httpServletResponse, times(1)).addCookie(cookie);
-		verify(httpServletResponse, times(1)).addHeader(headerMapEntry.getKey(), headerMapEntry.getValue());
-		verify(cacheRepository, times(1)).getContent(responseCache);
 	}
 	
 	@Test(expected = NullPointerException.class)
-	public void testProcessRequestCacheValidServeFromRest() throws Exception {
+	public void testProcessRequestPost() throws Exception {
 		String path = "testpath";
 		String cacheKey = "testpath{}";
 		
 		when(request.getHttpServletRequest()).thenReturn(httpServletRequest);
+		when(httpServletRequest.getMethod()).thenReturn("POST");
 		when(httpServletRequest.getParameterMap()).thenReturn(parameterMap);
 		when(parameterMap.toString()).thenReturn("{}");
 		when(cacheRepository.find(cacheKey)).thenReturn(responseCache);

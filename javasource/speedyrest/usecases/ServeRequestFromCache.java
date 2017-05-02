@@ -30,31 +30,48 @@ public class ServeRequestFromCache {
 	}
 	
 	public void serveRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path, String cacheKey, RestServiceHandler restServiceHandler) throws Exception {
-		ResponseCache responseCache = cacheRepository.find(cacheKey);
-		
-		if (cacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
-			cacheRepository.clearCacheEntry(responseCache);
-			responseCache = cacheRepository.createResponseCache(null);
+		if (isGetRequest(request)) {
+			try{
+				ResponseCache responseCache = cacheRepository.find(cacheKey);
+				
+				if (cacheValidator.isNotValid(responseCache, cacheRepository, logger)) {
+					cacheRepository.clearCacheEntry(responseCache);
+					responseCache = cacheRepository.createResponseCache(null);
+				}
+				
+				if (cacheValidator.isNotFound(responseCache, cacheRepository)) {
+					logger.debug("Served request from REST module: " + cacheKey);
+					ResponseCache newResponseCache = cacheRepository.createResponseCache(cacheKey);
+					SpeedyResponse speedyResponse = new SpeedyResponse(request, response, newResponseCache, cacheRepository);
+					serveFromRest(request, path, restServiceHandler, speedyResponse, newResponseCache);
+				}
+				if (cacheValidator.isFound(responseCache, cacheRepository)) {
+					logger.debug("Served request from SpeedyREST cache: " + cacheKey);
+					serveFromCache(responseCache, request, response, path, restServiceHandler);
+				}
+			} catch(Exception e) {
+				logger.error("Error encountered during serving from SpeedyREST cache: " + e);
+				restServiceHandler.processRequest(request, response, path);
+			}	
 		}
 		
-		if (cacheValidator.isNotFound(responseCache, cacheRepository)) {
-			logger.debug("Served request from REST module: " + cacheKey);
-			ResponseCache newResponseCache = cacheRepository.createResponseCache(cacheKey);
-			SpeedyResponse speedyResponse = new SpeedyResponse(request, response, newResponseCache, cacheRepository);
-			serveFromRest(request, path, restServiceHandler, speedyResponse, newResponseCache);
-		}
-		if (cacheValidator.isFound(responseCache, cacheRepository)) {
-			logger.debug("Served request from SpeedyREST cache: " + cacheKey);
-			serveFromCache(responseCache, response);
+		if (isNoGetRequest(request)) {
+			logger.debug("Served request from REST module: POST request");
+			restServiceHandler.processRequest(request, response, path);
 		}
 	}
 	
-	private void serveFromCache(ResponseCache responseCache, IMxRuntimeResponse response) throws IOException {
-		setHeaders(response, responseCache);
-		setCookies(response, responseCache);
+	private void serveFromCache(ResponseCache responseCache, IMxRuntimeRequest request, IMxRuntimeResponse response, String path, RestServiceHandler restServiceHandler) throws IOException {
 		String content = cacheRepository.getContent(responseCache);
 		
+		if (content == null) {
+			logger.debug("Served request from REST module: binary content");
+			restServiceHandler.processRequest(request, response, path);
+		}
+		
 		if (content != null) {
+			setHeaders(response, responseCache);
+			setCookies(response, responseCache);
 			response.getOutputStream().write(content.getBytes());
 			response.getOutputStream().close();
 		}
@@ -62,6 +79,14 @@ public class ServeRequestFromCache {
 	
 	private void serveFromRest(IMxRuntimeRequest request, String path, RestServiceHandler restServiceHandler, SpeedyResponse speedyResponse, ResponseCache responseCache) throws Exception {
 		restServiceHandler.processRequest(request, speedyResponse, path);
+		if (isHttpStatusSuccess(speedyResponse)) {
+			logger.debug("HTTP status success: cache is stored");
+			cacheRepository.persist(responseCache);
+		}
+		if (isNoHttpStatusSuccess(speedyResponse)) {
+			logger.debug("HTTP status no success: cache not stored");
+			cacheRepository.clearCacheEntry(responseCache);
+		}
 	}
 	
 	private void setCookies(IMxRuntimeResponse response, ResponseCache cachedResponse) {
@@ -79,5 +104,21 @@ public class ServeRequestFromCache {
 			Map.Entry<String, String> header = headerIterator.next();
 			response.getHttpServletResponse().addHeader(header.getKey(), header.getValue());
 		}
+	}
+	
+	private boolean isGetRequest (IMxRuntimeRequest request) {
+		return request.getHttpServletRequest().getMethod().equals("GET");
+	}
+	
+	private boolean isNoGetRequest (IMxRuntimeRequest request) {
+		return !isGetRequest(request);
+	}
+	
+	private boolean isHttpStatusSuccess (IMxRuntimeResponse response) {
+		return (response.getHttpServletResponse().getStatus() == 200);
+	}
+	
+	private boolean isNoHttpStatusSuccess (IMxRuntimeResponse response) {
+		return !isHttpStatusSuccess(response);
 	}
 }

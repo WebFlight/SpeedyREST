@@ -5,7 +5,6 @@ import java.math.BigInteger;
 
 import javax.servlet.ServletOutputStream;
 
-import com.mendix.core.CoreException;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
 
@@ -17,23 +16,17 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	private ServletOutputStream servletOutputStream;
 	private ResponseCache responseCache;
 	private CacheRepository cacheRepository;
-	private IMxRuntimeRequest request;
-	private IMxRuntimeResponse response;
 	
 	public SpeedyServletOutputStream(ServletOutputStream servletOutputStream, ResponseCache responseCache, CacheRepository cacheRepository, IMxRuntimeRequest request, IMxRuntimeResponse response) {
 
 		this.servletOutputStream = servletOutputStream;
 		this.responseCache = responseCache;
 		this.cacheRepository = cacheRepository;
-		this.request = request;
-		this.response = response;
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheRepository.addContent(responseCache, String.valueOf(b));
-		}
+		cacheRepository.addContent(responseCache, String.valueOf(b));
 		servletOutputStream.write(BigInteger.valueOf(b).toByteArray());
 	}
 	
@@ -44,29 +37,12 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 
 	@Override
 	public void write(byte[] b) throws IOException {
-		if (isGetRequest() && isHttpStatusSuccess()) {
-			cacheRepository.addContent(responseCache, new String(b));
-		}
-		servletOutputStream.write(b);
+		cacheRepository.addContent(responseCache, new String(b));
+		this.servletOutputStream.write(b);
 	}
 	
 	@Override
 	public void close() throws IOException {
-		if (this.responseCache.getContent() != null) {
-			try {
-				cacheRepository.persist(responseCache);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		}
 		this.servletOutputStream.close();
-	}
-	
-	private boolean isGetRequest () {
-		return request.getHttpServletRequest().getMethod().equals("GET");
-	}
-	
-	private boolean isHttpStatusSuccess () {
-		return (response.getHttpServletResponse().getStatus() == 200);
 	}
 }
