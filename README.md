@@ -47,4 +47,4 @@ In some applications this is not desirable, especially when the response is used
 * Mendix security is not implemented. As a result, cached REST responses are publicly accessible.
 * For contributions: fork this repository, make changes, fix/add unit tests in speedyrest.tests package and issue pull request.
 
- [1]: docs/logo.png
+ [1]: https://github.com/WebFlight/SpeedyREST/blob/master/docs/logo.png
