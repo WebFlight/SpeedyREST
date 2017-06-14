@@ -30,7 +30,7 @@ public class JA_StartSpeedyREST extends CustomJavaAction<java.lang.Boolean>
 		// BEGIN USER CODE
 		CacheValidator cacheValidator = new CacheValidator();
 		RestServiceHandler restServiceHandler = new RestServiceHandler();
-		CacheRepository cacheRepository = new CacheRepository(this.getContext());
+		CacheRepository cacheRepository = new CacheRepository();
 		
 		Core.addRequestHandler("srest/", 
 				new ServeRequestFromCacheHandler(cacheRepository, cacheValidator, restServiceHandler));
