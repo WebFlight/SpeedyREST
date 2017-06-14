@@ -20,40 +20,38 @@ import speedyrest.proxies.constants.Constants;
 
 public class CacheRepository {
 
-	private IContext context;
-
-	public CacheRepository(IContext context) {
-		this.context = context;
+	public CacheRepository() {
+		
 	}
 	
 	public ResponseCache find(String cacheKey) throws CoreException {
-		List<IMendixObject> objectList = Core.retrieveXPathQuery(context, "//SpeedyREST.ResponseCache[Key='" + cacheKey + "']");
+		List<IMendixObject> objectList = Core.retrieveXPathQuery(Core.createSystemContext(), "//SpeedyREST.ResponseCache[Key='" + cacheKey + "']");
 		if (objectList.size() == 0) {
-			return new ResponseCache(context);
+			return new ResponseCache(Core.createSystemContext());
 		}
-		return ResponseCache.initialize(context, objectList.get(0));
+		return ResponseCache.initialize(Core.createSystemContext(), objectList.get(0));
 	}
 
 	public void persist(ResponseCache responseCache) throws CoreException {
-		responseCache.commit(context);
+		responseCache.commit(Core.createSystemContext());
 	}
 	
 	public ResponseCache createResponseCache(String key) {
-		ResponseCache responseCache = new ResponseCache(context);
+		ResponseCache responseCache = new ResponseCache(Core.createSystemContext());
 		responseCache.setKey(key);
 		return responseCache;
 	}
 	
 	public String getContent(ResponseCache responseCache) {
-		return responseCache.getContent(context);
+		return responseCache.getContent(Core.createSystemContext());
 	}
 	
 	public String getKey(ResponseCache responseCache) {
-		return responseCache.getKey(context);
+		return responseCache.getKey(Core.createSystemContext());
 	}
 	
 	public Date getDateTimeCreated(ResponseCache responseCache) throws CoreException {
-		return responseCache.getMendixObject().getCreatedDate(context);
+		return responseCache.getMendixObject().getCreatedDate(Core.createSystemContext());
 	}
 	
 	public void addContent(ResponseCache responseCache, String content) {
@@ -63,11 +61,11 @@ public class CacheRepository {
 		}
 		StringBuilder stringBuilder = new StringBuilder(oldContent);
 		stringBuilder.append(content);
-		responseCache.setContent(context, stringBuilder.toString());
+		responseCache.setContent(Core.createSystemContext(), stringBuilder.toString());
 	}
 	
 	public SpeedyHeaders getHeaders(ResponseCache responseCache) {
-		return deserializeHeaders(responseCache.getHeaders(context));
+		return deserializeHeaders(responseCache.getHeaders(Core.createSystemContext()));
 	}
 	
 	public void addHeader(ResponseCache responseCache, String key, String value) {
@@ -77,17 +75,17 @@ public class CacheRepository {
 		}
 		
 		speedyHeaders.addHeader(key, value);
-		responseCache.setHeaders(context, serializeHeaders(speedyHeaders));
+		responseCache.setHeaders(Core.createSystemContext(), serializeHeaders(speedyHeaders));
 	}
 
 	public List<Cookie> getCookies(ResponseCache responseCache) {
-		return deserializeCookies(responseCache.getCookies(context));
+		return deserializeCookies(responseCache.getCookies(Core.createSystemContext()));
 	}
 	
 	public void addCookie(ResponseCache responseCache, Cookie cookie) {
 		List<Cookie> cookies = getCookies(responseCache);
 		cookies.add(cookie);
-		responseCache.setCookies(context, serializeCookies(cookies));
+		responseCache.setCookies(Core.createSystemContext(), serializeCookies(cookies));
 	}
 	
 	public long cacheTTL() {
@@ -95,7 +93,7 @@ public class CacheRepository {
 	}
 	
 	public void clearCacheEntry(ResponseCache responseCache) {
-		Core.delete(context, responseCache.getMendixObject());
+		Core.delete(Core.createSystemContext(), responseCache.getMendixObject());
 	}
 	
 	private SpeedyHeaders deserializeHeaders(String headerString) {
