@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import com.mendix.m2ee.api.IMxRuntimeRequest;
 import com.mendix.m2ee.api.IMxRuntimeResponse;
@@ -44,5 +45,15 @@ public class SpeedyServletOutputStream extends ServletOutputStream {
 	@Override
 	public void close() throws IOException {
 		this.servletOutputStream.close();
+	}
+
+	@Override
+	public boolean isReady() {
+		return this.servletOutputStream.isReady();
+	}
+
+	@Override
+	public void setWriteListener(WriteListener arg0) {
+		this.servletOutputStream.setWriteListener(arg0);
 	}
 }
