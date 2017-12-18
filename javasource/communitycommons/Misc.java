@@ -472,7 +472,7 @@ public class Misc
 	}
 
 	public static Boolean executeMicroflowInBatches(String xpath, final String microflow, int batchsize, boolean waitUntilFinished, boolean asc) throws CoreException, InterruptedException {
-		Core.getLogger("communitycommons").info("[ExecuteInBatches] Starting microflow batch '" + microflow + "...");
+		Core.getLogger("communitycommons").debug("[ExecuteInBatches] Starting microflow batch '" + microflow + "...");
 		
 		return executeInBatches(xpath, new BatchState(new IBatchItemHandler() {
 
@@ -488,7 +488,7 @@ public class Misc
 	public static Boolean recommitInBatches(String xpath, int batchsize,
 			boolean waitUntilFinished, Boolean asc) throws CoreException, InterruptedException
 	{
-		Core.getLogger("communitycommons").info("[ExecuteInBatches] Starting recommit batch...");
+		Core.getLogger("communitycommons").debug("[ExecuteInBatches] Starting recommit batch...");
 		
 		return executeInBatches(xpath, new BatchState(new IBatchItemHandler() {
 
@@ -509,7 +509,7 @@ public class Misc
 		int loop = (int) Math.ceil(((float)count) / ((float)batchsize));
 		
 		
-		Core.getLogger("communitycommons").info(
+		Core.getLogger("communitycommons").debug(
 				"[ExecuteInBatches] Starting batch on ~ " + count + " objects divided over ~ " + loop + " batches. "
 				+ (waitUntilFinished ? "Waiting until the batch has finished..." : "")
 		);
@@ -546,7 +546,7 @@ public class Misc
 					
 					//no new objects found :)
 					if (objects.size() == 0) {
-						Core.getLogger("communitycommons").info("[ExecuteInBatches] Succesfully finished batch on ~" + count + " objects.");
+						Core.getLogger("communitycommons").debug("[ExecuteInBatches] Succesfully finished batch on ~" + count + " objects.");
 						batchState.setState(1);
 					}
 					else {
@@ -637,7 +637,7 @@ public class Misc
 	 * @return boolean
 	 * @throws IOException
 	 */
-	public static boolean overlayPdf(IContext context, IMendixObject generatedDocumentMendixObject, IMendixObject overlayMendixObject) throws IOException {	
+	public static boolean overlayPdf(IContext context, IMendixObject generatedDocumentMendixObject, IMendixObject overlayMendixObject, boolean onTopOfContent) throws IOException {	
 		ILogNode logger = Core.getLogger("OverlayPdf"); 
 		logger.trace("Retrieve generated document");
 		PDDocument inputDoc = PDDocument.load(Core.getFileDocumentContent(context, generatedDocumentMendixObject));
@@ -649,7 +649,11 @@ public class Misc
 		Overlay overlay = new Overlay();
 		overlay.setInputPDF(inputDoc);
 		overlay.setDefaultOverlayPDF(overlayDoc);
-		overlay.setOverlayPosition(Overlay.Position.BACKGROUND);
+		if (onTopOfContent == true){
+			overlay.setOverlayPosition(Overlay.Position.FOREGROUND);
+		} else {
+			overlay.setOverlayPosition(Overlay.Position.BACKGROUND);
+		}
 		
 		logger.trace("Save result in output stream");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

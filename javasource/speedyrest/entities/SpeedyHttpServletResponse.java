@@ -219,4 +219,8 @@ public class SpeedyHttpServletResponse implements HttpServletResponse {
 		this.httpServletResponse.setStatus(arg0, arg1);
 	}
 
+	@Override
+	public void setContentLengthLong(long arg0) {
+		this.httpServletResponse.setContentLengthLong(arg0);	
+	}
 }
