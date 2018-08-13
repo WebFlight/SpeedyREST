@@ -93,4 +93,9 @@ public class SpeedyResponse implements IMxRuntimeResponse{
 		this.response.setStatus(arg0);	
 	}
 
+	@Override
+	public void setStatus(int arg0, String arg1) {
+		this.response.setStatus(arg0, arg1);
+	}
+
 }
